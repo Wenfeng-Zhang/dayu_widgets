@@ -675,6 +675,69 @@ model_1 = MTableModel()
         self.setLayout(main_lay)
 ```
 ----------------------------------------
+TITLE: Using MPushButtonDelegate Widget
+DESCRIPTION: Name
+SOURCE: https://github.com/phenom-films/dayu_widgets/blob/master/examples/delegate_button_example2.py#L1
+LANGUAGE: Python
+CODE: ```
+# Import local modules
+    from dayu_widgets import dayu_theme
+    from dayu_widgets.qt import application
+
+    with application() as app:
+        test = DelegateButtonExample()
+        dayu_theme.apply(test)
+        test.show()
+```
+----------------------------------------
+TITLE: Initializing MPushButtonDelegate UI
+DESCRIPTION: Example of how to initialize and configure the UI for MPushButtonDelegate widget.
+SOURCE: https://github.com/phenom-films/dayu_widgets/blob/master/examples/delegate_button_example2.py#L1
+LANGUAGE: Python
+CODE: ```
+model_1 = MTableModel()
+        model_1.set_header_list(header_list)
+        model_sort = MSortFilterModel()
+        model_sort.setSourceModel(model_1)
+
+        table_grid = MTableView(size=dayu_theme.small, show_row_count=True)
+        table_grid.setShowGrid(True)
+        table_grid.setModel(model_sort)
+        model_sort.set_header_list(header_list)
+        table_grid.set_header_list(header_list)
+        button_delegate = MPushButtonDelegate(parent=self)
+        table_grid.setItemDelegateForColumn(4, button_delegate)
+        button_delegate.sig_clicked.connect(self.slot_cell_clicked)
+        model_1.set_data_list(
+            [
+                {
+                    "name": "John Brown",
+                    "sex": "Male",
+                    "sex_list": ["Male", "Female"],
+                    "age": 18,
+                    "score": 89,
+                    "city": "New York",
+                    "city_list": ["New York", "Ottawa", "London", "Sydney"],
+                    "date": "2016-10-03",
+                },
+                {
+                    "name": "Jim Green",
+                    "sex": "Male",
+                    "sex_list": ["Male", "Female"],
+                    "age": 24,
+                    "score": 55,
+                    "city": "London",
+                    "city_list": ["New York", "Ottawa", "London", "Sydney"],
+                    "date": "2016-10-01",
+                },
+            ]
+        )
+
+        main_lay = QtWidgets.QVBoxLayout()
+        main_lay.addWidget(table_grid)
+        self.setLayout(main_lay)
+```
+----------------------------------------
 TITLE: Using DividerExample Widget
 DESCRIPTION: + str(self.field(
 SOURCE: https://github.com/phenom-films/dayu_widgets/blob/master/examples/divider_example.py#L1
@@ -2739,6 +2802,7 @@ CODE: ```
     with application() as app:
         test = TreeViewExample()
         dayu_theme.apply(test)
+        test.model_1.set_data_list(generate_tree_data_list())
         test.show()
 ```
 ----------------------------------------
@@ -2748,6 +2812,7 @@ SOURCE: https://github.com/phenom-films/dayu_widgets/blob/master/examples/tree_v
 LANGUAGE: Python
 CODE: ```
 model_1 = MTableModel()
+        self.model_1 = model_1
         model_1.set_header_list(mock.header_list)
         model_sort = MSortFilterModel()
         model_sort.setSourceModel(model_1)
@@ -2758,6 +2823,8 @@ model_1 = MTableModel()
         model_sort.set_header_list(mock.header_list)
         tree_view.set_header_list(mock.header_list)
         model_1.set_data_list(mock.tree_data_list)
+        # model_1.checkStateChanged.connect(self.print_)
+        model_1.dataChanged.connect(self.print_)
 
         line_edit = MLineEdit().search().small()
         line_edit.textChanged.connect(model_sort.set_search_pattern)
@@ -2776,5 +2843,96 @@ model_1 = MTableModel()
         main_lay.addLayout(button_lay)
         main_lay.addWidget(tree_view)
         main_lay.addStretch()
+        self.setLayout(main_lay)
+```
+----------------------------------------
+TITLE: Using TreeViewMultiLevelExample Widget
+DESCRIPTION: Example of how to use the TreeViewMultiLevelExample widget from dayu_widgets library.
+SOURCE: https://github.com/phenom-films/dayu_widgets/blob/master/examples/tree_view_multi_level_example.py#L1
+LANGUAGE: Python
+CODE: ```
+# Import local modules
+    from dayu_widgets.qt import application
+
+    with application() as app:
+        test = TreeViewMultiLevelExample()
+        dayu_theme.apply(test)
+        test.resize(1000, 700)
+        test.show()
+```
+----------------------------------------
+TITLE: Initializing TreeViewMultiLevelExample UI
+DESCRIPTION: Example of how to initialize and configure the UI for TreeViewMultiLevelExample widget.
+SOURCE: https://github.com/phenom-films/dayu_widgets/blob/master/examples/tree_view_multi_level_example.py#L1
+LANGUAGE: Python
+CODE: ```
+# ---- Model ----
+        self.model_1 = MTableModel(page_size=100)
+        self.model_1.set_header_list(header_list)
+        self.model_sort = MSortFilterModel()
+        self.model_sort.setSourceModel(self.model_1)
+        self.model_sort.set_header_list(header_list)
+
+        # ---- Tree View ----
+        self.tree_view = MTreeView()
+        self.tree_view.setModel(self.model_sort)
+        self.tree_view.set_header_list(header_list)
+
+        # ---- Info Label ----
+        self.info_label = MLabel().secondary()
+        self.info_label.setWordWrap(True)
+
+        # ---- Search ----
+        self.search_edit = MLineEdit().search().small()
+        self.search_edit.setPlaceholderText("Search (triggers full data load)...")
+        self.search_edit.textChanged.connect(self._on_search_changed)
+        self.clear_search_btn = MPushButton("Clear Search").small()
+        self.clear_search_btn.clicked.connect(self._on_clear_search)
+
+        # ---- Buttons ----
+        self.expand_all_btn = MPushButton("Expand All").small()
+        self.expand_all_btn.clicked.connect(self.tree_view.expandAll)
+        self.collapse_all_btn = MPushButton("Collapse All").small()
+        self.collapse_all_btn.clicked.connect(self.tree_view.collapseAll)
+
+        self.load_small_btn = MPushButton("Small (50)").small()
+        self.load_small_btn.clicked.connect(lambda: self._load_data(root_count=50, max_l1=8, max_l2=3, max_l3=1))
+
+        self.load_default_btn = MPushButton("Default (200)").small()
+        self.load_default_btn.clicked.connect(self._load_default_data)
+
+        self.load_large_btn = MPushButton("Large (500)").small()
+        self.load_large_btn.clicked.connect(lambda: self._load_data(root_count=500, max_l1=15, max_l2=5, max_l3=3))
+
+        self.load_heavy_btn = MPushButton("Heavy (1000)").small()
+        self.load_heavy_btn.clicked.connect(lambda: self._load_data(root_count=1000, max_l1=8, max_l2=3, max_l3=1))
+
+        self.print_stats_btn = MPushButton("Print Stats").small()
+        self.print_stats_btn.clicked.connect(self._print_stats)
+
+        # ---- Layout ----
+        button_row1 = QtWidgets.QHBoxLayout()
+        button_row1.addWidget(MLabel("Data:"))
+        button_row1.addWidget(self.load_small_btn)
+        button_row1.addWidget(self.load_default_btn)
+        button_row1.addWidget(self.load_large_btn)
+        button_row1.addWidget(self.load_heavy_btn)
+        button_row1.addSpacing(20)
+        button_row1.addWidget(self.expand_all_btn)
+        button_row1.addWidget(self.collapse_all_btn)
+        button_row1.addWidget(self.print_stats_btn)
+        button_row1.addStretch()
+
+        button_row2 = QtWidgets.QHBoxLayout()
+        button_row2.addWidget(MLabel("Search:"))
+        button_row2.addWidget(self.search_edit)
+        button_row2.addWidget(self.clear_search_btn)
+        button_row2.addStretch()
+
+        main_lay = QtWidgets.QVBoxLayout()
+        main_lay.addLayout(button_row1)
+        main_lay.addLayout(button_row2)
+        main_lay.addWidget(self.info_label)
+        main_lay.addWidget(self.tree_view)
         self.setLayout(main_lay)
 ```

@@ -17,6 +17,41 @@
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 </p>
 
+<!-- ================= 以下为本 fork 新增内容（相对上游 v1.1.1） ================= -->
+
+## 📌 本 Fork 更新说明
+
+> 本仓库基于上游 [dayu_widgets](https://github.com/phenom-films/dayu_widgets) fork，版本升至 **1.2.0**（Qt 抽象层由 `qtpy` 切换为 `Qt.py`，不再兼容 Python 2）。以下为相对上游 v1.1.1 的主要更新，完整变更见 [CHANGELOG.md](CHANGELOG.md)。
+
+### 模型层（item_model.py）
+- `MTableModel` 支持生成器/迭代器数据源，`fetchMore` 逐块消费，可承载超大数据集
+- 新增显式分页 `set_page()` 与页内懒加载，配合 `MItemViewFullSet` 实现"分页 + 懒加载 + 过滤后重建分页"（见 `examples/tree_view_paging_example.py`）
+- 重写排序：Python 层整体排序、`None` 恒置尾部，`restore_original_order()` 可恢复插入顺序
+- `MSortFilterModel` 新增 300ms 延迟过滤（防抖）、批量过滤接口、过滤结果缓存及 `filter_finished`/`sort_finished` 信号；树形过滤支持"子项命中则保留父项"
+
+### 视图层（item_view.py / header_view.py）
+- `MTreeView.expandAll` 先 `load_all_data()` 再批量展开，规避 PySide6 逐节点 `fetchMore` 卡顿
+- `MHeaderView` 上下文菜单新增 **Reset Sort**；修复排序指示器首次点击不生效、EditRole 为 `None` 时委托崩溃等问题
+
+### 组件增强与修复
+- `MSplitter`：双击 handle 均分，handle 新增折叠/展开箭头按钮
+- `MPage`：修复首次翻页不触发与页码越界问题
+- `MSequenceFile`：新增 `file_label`/`sequence_check_box` 属性并加入公共导出
+- `browser.py` 新增 `FileButton`：支持拖入目录递归收集匹配文件
+
+### 基础设施
+- 新增 `CUSTOM_STATIC_FOLDERS` 机制，可注入自定义静态资源目录
+- `main.qss` 主题样式大量更新（约 +345 行）：新增 wizard 步骤条（`QLabel#wizard-step`）、`QToolButton[taobao=true]`、登录/搜索/加号按钮、QComboBox、QGroupBox 等选择器
+- `utils.py`：修复 `from_list_to_nested_dict` 丢失子树、`add_settings` 增加控件存活检查与 `unbind`
+
+### 新增示例
+- `examples/delegate_button_example2.py` — 表格内按钮委托
+- `examples/tree_view_multi_level_example.py` — 多层树懒加载
+- `examples/tree_view_50000_example.py` — 5 万行压力测试
+- `examples/tree_view_paging_example.py` — 分页 + 页内懒加载 + 过滤重建分页
+
+<!-- ================= 以上为本 fork 新增内容 ================= -->
+
 > **AI Assistant Integration**: This project is integrated with [Context7](https://context7.com/phenom-films/dayu_widgets), allowing AI assistants to access up-to-date documentation and examples. Try prompts like: `帮我创建一个dayu_widgets的进度条， use context7`
 
 

@@ -1,3 +1,25 @@
+## v1.2.0 (2025-07-31)
+
+### BREAKING CHANGE
+
+- Switch from `qtpy` to `Qt.py` as Qt abstraction layer
+- Drop Python 2 compatibility by removing `__future__` imports
+
+### Feat
+
+- Add `MSequenceFile` widget to public API exports
+- Add `file_label` and `sequence_check_box` properties to `MSequenceFile`
+- Add `modify_gray()` method for gray icon fallback with text overlay
+- Add lazy import pattern (`_get_utils`, `_get_dayu_theme`) to break circular dependencies
+- Use Qt native grayscale conversion for image processing
+- Major `item_model.py` and `browser.py` refactoring and improvements
+- Add extensive QSS style updates to `main.qss`
+
+### Refactor
+
+- Migrate examples from `qtpy` to `Qt` module imports
+- Remove `__future__` imports across all source files
+
 ## v1.1.1 (2025-07-28)
 
 ### Fix
