@@ -1,9 +1,22 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+###################################################################
+# Author: Mu yanru
+# Date  : 2019.2
+# Email : muyanru345@163.com
+###################################################################
+
+# Import future modules
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 # Import built-in modules
 import functools
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -121,7 +134,7 @@ class ProgressCircleExample(QtWidgets.QWidget, MFieldMixin):
         custom_layout.addWidget(MDivider())
         custom_layout.addWidget(lab3)
         custom_layout.addStretch()
-        custom_circle = MProgressCircle()
+        custom_circle = MProgressCircle(parent=self)
         custom_circle.set_dayu_width(180 * scale_x)
         custom_circle.setValue(75)
         custom_circle.set_widget(custom_widget)

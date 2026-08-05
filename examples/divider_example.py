@@ -1,5 +1,18 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+###################################################################
+# Author: Mu yanru
+# Date  : 2019.2
+# Email : muyanru345@163.com
+###################################################################
+
+# Import future modules
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 # Import third-party modules
-from qtpy import QtWidgets
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.divider import MDivider
@@ -21,7 +34,7 @@ class DividerExample(QtWidgets.QWidget, MFieldMixin):
         div5 = MDivider.right("Right Text")
         div6 = MDivider.vertical()
         div7 = MDivider.vertical()
-        div8 = MDivider.left("orientation=Qt.Vertical")
+        div8 = MDivider.left("Horizontal Left")
         label1 = MLabel("Maya").strong()
         label2 = MLabel("Nuke").underline()
         label3 = MLabel("Houdini").mark()
@@ -33,7 +46,9 @@ class DividerExample(QtWidgets.QWidget, MFieldMixin):
         sub_lay.addWidget(label3)
         sub_lay.addStretch()
 
-        some_text = "Steven Paul Jobs was an American entrepreneur and business magnate."
+        some_text = (
+            "Steven Paul Jobs was an American entrepreneur and business magnate."
+        )
         main_lay = QtWidgets.QVBoxLayout()
         main_lay.addWidget(MLabel(some_text))
         main_lay.addWidget(div1)

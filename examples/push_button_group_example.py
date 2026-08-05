@@ -1,6 +1,19 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+###################################################################
+# Author: Mu yanru
+# Date  : 2019.2
+# Email : muyanru345@163.com
+###################################################################
+
+# Import future modules
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -15,6 +28,7 @@ from dayu_widgets.qt import MIcon
 class PushButtonGroupExample(QtWidgets.QWidget, MFieldMixin):
     def __init__(self, parent=None):
         super(PushButtonGroupExample, self).__init__(parent)
+        self.setWindowTitle("PushButtonGroup Example")
         self._init_ui()
 
     def _init_ui(self):
@@ -49,7 +63,11 @@ class PushButtonGroupExample(QtWidgets.QWidget, MFieldMixin):
         h_lay_2.addStretch()
 
         main_lay = QtWidgets.QVBoxLayout()
-        main_lay.addWidget(MLabel("MPushButtonGroup is MPushButton collection. they are not exclusive."))
+        main_lay.addWidget(
+            MLabel(
+                "MPushButtonGroup is MPushButton collection. they are not exclusive."
+            )
+        )
         main_lay.addWidget(MDivider("MPushButton group: Horizontal & Small Size"))
         main_lay.addLayout(h_lay)
         main_lay.addWidget(MDivider("MPushButton group: Vertical & Default Size"))

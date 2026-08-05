@@ -24,11 +24,12 @@ from dayu_widgets.sequence_file import MSequenceFile
 class SequenceFileExample(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(SequenceFileExample, self).__init__(parent)
+        self.setWindowTitle("SequenceFile Example")
         self._init_ui()
 
     def _init_ui(self):
         browser = MDragFileButton(text="Click or drag files")
-        browser.set_dayu_filters([".py", "pyc", ".jpg", ".mov", "exr"])
+        browser.set_dayu_filters([".py", ".pyc", ".jpg", ".mov", ".exr"])
         browser.sig_file_changed.connect(self.slot_add_file)
         self.sequence_file_1 = MSequenceFile()
 

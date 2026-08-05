@@ -1,9 +1,20 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+###################################################################
+# Author: Mu yanru
+# Date  : 2019.2
+# Email : muyanru345@163.com
+###################################################################
 """
 Example code for MDateTimeEdit, MDoubleSpinBox, MSpinBox, MTimeEdit, MDateEdit
 """
+# Import future modules
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 # Import third-party modules
-from qtpy import QtWidgets
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.divider import MDivider
@@ -35,7 +46,6 @@ class SpinBoxExample(QtWidgets.QWidget):
         date_edit = MDateEdit()
         date_edit.setCalendarPopup(True)
         time_edit = MTimeEdit()
-        time_edit.setCalendarPopup(True)
         date_lay = QtWidgets.QHBoxLayout()
         date_lay.addWidget(date_time_edit)
         date_lay.addWidget(date_edit)

@@ -1,5 +1,18 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+###################################################################
+# Author: Mu yanru
+# Date  : 2019.2
+# Email : muyanru345@163.com
+###################################################################
+
+# Import future modules
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 # Import third-party modules
-from qtpy import QtWidgets
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -49,7 +62,6 @@ class LoadingExample(QtWidgets.QWidget, MFieldMixin):
         main_lay.addWidget(MDivider("different color"))
         main_lay.addLayout(color_lay)
         main_lay.addWidget(MDivider("loading wrapper"))
-        # main_lay.addLayout(wrapper_lay)
 
         main_lay.addStretch()
         self.setLayout(main_lay)

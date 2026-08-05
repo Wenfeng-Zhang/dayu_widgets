@@ -1,8 +1,23 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+###################################################################
+# Author: Mu yanru
+# Date  : 2019.2
+# Email : muyanru345@163.com
+###################################################################
+
+# Import future modules
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
 # Import built-in modules
+import itertools
 import random
 
 # Import third-party modules
-from qtpy import QtWidgets
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -16,13 +31,12 @@ from dayu_widgets.menu import MMenu
 class ComboBoxExample(QtWidgets.QWidget, MFieldMixin):
     def __init__(self, parent=None):
         super(ComboBoxExample, self).__init__(parent)
+        self.setWindowTitle("ComboBox Example")
         self._init_ui()
 
     def _init_ui(self):
         cities = ["北京", "上海", "广州", "深圳"]
         self.register_field("button1_selected", "北京")
-        menu1 = MMenu(parent=self)
-        menu1.set_data(cities)
         size_list = [
             ("Large", dayu_theme.large),
             ("Medium", dayu_theme.medium),
@@ -32,9 +46,13 @@ class ComboBoxExample(QtWidgets.QWidget, MFieldMixin):
         for label, size in size_list:
             combo_box = MComboBox()
             combo_box.set_dayu_size(size)
-            combo_box.set_menu(menu1)
+            menu = MMenu(parent=self)
+            menu.set_data(cities)
+            combo_box.set_menu(menu)
             size_lay.addWidget(combo_box)
-            self.bind("button1_selected", combo_box, "value", signal="sig_value_changed")
+            self.bind(
+                "button1_selected", combo_box, "value", signal="sig_value_changed"
+            )
 
         self.register_field("button2_selected", ["北京"])
         menu2 = MMenu(exclusive=False, parent=self)
@@ -44,9 +62,10 @@ class ComboBoxExample(QtWidgets.QWidget, MFieldMixin):
         self.bind("button2_selected", select2, "value", signal="sig_value_changed")
 
         def dynamic_get_city():
-            all_cities = cities + ["郑州", "石家庄"]
-            count = random.randint(2, min(4, len(all_cities)))
-            return random.sample(all_cities, count)
+            data = cities + ["郑州", "石家庄"]
+            start = random.randint(0, len(data))
+            end = random.randint(start, len(data))
+            return data[start:end]
 
         self.register_field("button3_selected", "")
         menu3 = MMenu(parent=self)
@@ -64,13 +83,6 @@ class ComboBoxExample(QtWidgets.QWidget, MFieldMixin):
                 ],
                 "value": "\u5317\u4eac",
                 "label": "\u5317\u4eac",
-            },
-            {
-                "children": [
-                    {"value": "\u6545\u5bab", "label": "\u6545\u5bab"},
-                ],
-                "value": "\u4e1c\u4eac",
-                "label": "\u4e1c\u4eac",
             },
             {
                 "children": [
@@ -111,7 +123,6 @@ class ComboBoxExample(QtWidgets.QWidget, MFieldMixin):
         select4.set_menu(menu4)
         select4.set_formatter(lambda x: " / ".join(x))
         self.bind("button4_selected", select4, "value", signal="sig_value_changed")
-        select4.set_value("北京/故宫")
 
         self.register_field("button5_selected", "")
         menu5 = MMenu(exclusive=False, parent=self)
@@ -168,6 +179,7 @@ class ComboBoxExample(QtWidgets.QWidget, MFieldMixin):
 
 if __name__ == "__main__":
     # Import local modules
+    from dayu_widgets import dayu_theme
     from dayu_widgets.qt import application
 
     with application() as app:

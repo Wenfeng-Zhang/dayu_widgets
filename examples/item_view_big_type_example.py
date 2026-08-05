@@ -1,9 +1,21 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+###################################################################
+# Author: Mu yanru
+# Date  : 2019.2
+# Email : muyanru345@163.com
+###################################################################
+# Import future modules
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 # Import built-in modules
 import functools
 
 # Import third-party modules
-from qtpy import QtGui
-from qtpy import QtWidgets
+from Qt import QtGui
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -12,12 +24,16 @@ from dayu_widgets.divider import MDivider
 from dayu_widgets.field_mixin import MFieldMixin
 from dayu_widgets.item_view_set import MItemViewSet
 from dayu_widgets.tool_button import MToolButton
-import examples._mock_data as mock
+try:
+    import examples._mock_data as mock
+except ImportError:
+    import _mock_data as mock
 
 
 class ItemViewBigTypeExample(QtWidgets.QWidget, MFieldMixin):
     def __init__(self, parent=None):
         super(ItemViewBigTypeExample, self).__init__(parent)
+        self.setWindowTitle("ItemViewBigType Example")
         self._init_ui()
 
     def _init_ui(self):
@@ -34,9 +50,13 @@ class ItemViewBigTypeExample(QtWidgets.QWidget, MFieldMixin):
             ]
         )
         add_button = MToolButton().svg("add_line.svg")
-        add_button.clicked.connect(functools.partial(item_view_set_thumbnail.item_view.scale_size, 1.1))
+        add_button.clicked.connect(
+            functools.partial(item_view_set_thumbnail.item_view.scale_size, 1.1)
+        )
         minus_button = MToolButton().svg("minus_line.svg")
-        minus_button.clicked.connect(functools.partial(item_view_set_thumbnail.item_view.scale_size, 0.8))
+        minus_button.clicked.connect(
+            functools.partial(item_view_set_thumbnail.item_view.scale_size, 0.8)
+        )
         button_lay = QtWidgets.QHBoxLayout()
         button_lay.addWidget(minus_button)
         button_lay.addWidget(add_button)

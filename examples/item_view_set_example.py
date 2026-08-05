@@ -1,5 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+###################################################################
+# Author: Mu yanru
+# Date  : 2019.2
+# Email : muyanru345@163.com
+###################################################################
+# Import future modules
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 # Import third-party modules
-from qtpy import QtWidgets
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import utils
@@ -7,13 +19,17 @@ from dayu_widgets.divider import MDivider
 from dayu_widgets.field_mixin import MFieldMixin
 from dayu_widgets.item_view_set import MItemViewSet
 from dayu_widgets.push_button import MPushButton
-import examples._mock_data as mock
+try:
+    import examples._mock_data as mock
+except ImportError:
+    import _mock_data as mock
 
 
 @utils.add_settings("DaYu", "DaYuExample", event_name="hideEvent")
 class ItemViewSetExample(QtWidgets.QWidget, MFieldMixin):
     def __init__(self, parent=None):
         super(ItemViewSetExample, self).__init__(parent)
+        self.setWindowTitle("ItemViewSet Example")
         self._init_ui()
 
     def _init_ui(self):

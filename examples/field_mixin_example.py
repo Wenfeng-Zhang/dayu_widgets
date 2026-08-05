@@ -1,5 +1,18 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+###################################################################
+# Author: Mu yanru
+# Date  : 2019.3
+# Email : muyanru345@163.com
+###################################################################
+
+# Import future modules
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 # Import third-party modules
-from qtpy import QtWidgets
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.field_mixin import MFieldMixin
@@ -12,6 +25,7 @@ from dayu_widgets.qt import MPixmap
 class FieldMixinExample(QtWidgets.QWidget, MFieldMixin):
     def __init__(self, parent=None):
         super(FieldMixinExample, self).__init__(parent)
+        self.setWindowTitle("FieldMixin Example")
         self.register_field("my_name", "xiaoming")
         self.register_field("thumbnail_path", "")
         self.register_field("is_enable", True)
@@ -36,7 +50,9 @@ class FieldMixinExample(QtWidgets.QWidget, MFieldMixin):
         main_lay.addWidget(MLabel("Avatar:"), 0, 0)
         main_lay.addWidget(thumbnail_label, 0, 1)
         main_lay.addWidget(MLabel("Name:"), 1, 0)
-        main_lay.addWidget(self.bind("my_name", MLineEdit(), "text", signal="textEdited"), 1, 1)
+        main_lay.addWidget(
+            self.bind("my_name", MLineEdit(), "text", signal="textEdited"), 1, 1
+        )
         main_lay.addWidget(MLabel("Email:"), 2, 0)
         main_lay.addWidget(email_label, 2, 1)
         main_lay.addWidget(MLabel("Enabled:"), 3, 0)

@@ -1,5 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+###################################################################
+# Author: Mu yanru
+# Date  : 2019.2
+# Email : muyanru345@163.com
+###################################################################
+# Import future modules
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 # Import third-party modules
-from qtpy import QtWidgets
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -9,12 +21,16 @@ from dayu_widgets.item_model import MSortFilterModel
 from dayu_widgets.item_model import MTableModel
 from dayu_widgets.item_view import MListView
 from dayu_widgets.line_edit import MLineEdit
-import examples._mock_data as mock
+try:
+    import examples._mock_data as mock
+except ImportError:
+    import _mock_data as mock
 
 
 class ListViewExample(QtWidgets.QWidget, MFieldMixin):
     def __init__(self, parent=None):
         super(ListViewExample, self).__init__(parent)
+        self.setWindowTitle("ListView Example")
         self._init_ui()
 
     def _init_ui(self):
