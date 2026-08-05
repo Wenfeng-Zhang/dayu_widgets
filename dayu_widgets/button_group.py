@@ -4,9 +4,9 @@
 import functools
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtGui
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtGui
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -84,6 +84,10 @@ class MButtonGroupBase(QtWidgets.QWidget):
 
         if data_dict.get("toggled"):
             button.toggled.connect(data_dict.get("toggled"))
+        if data_dict.get("doubleClicked"):
+            button._dayu_double_clicked_callback = data_dict.get("doubleClicked")
+        if data_dict.get("size"):
+            button.resize(100, 100)
 
         if index is None:
             self._button_group.addButton(button)
@@ -103,14 +107,18 @@ class MButtonGroupBase(QtWidgets.QWidget):
 
             button.setVisible(False)
 
+        is_horizontal = self._orientation == "horizontal"
+        first_pos = "left" if is_horizontal else "top"
+        last_pos = "right" if is_horizontal else "bottom"
+
         for index, data_dict in enumerate(button_list):
             button = self.add_button(data_dict, index)
 
             if index == 0:
-                button.setProperty("position", "left")
+                button.setProperty("position", first_pos)
 
             elif index == len(button_list) - 1:
-                button.setProperty("position", "right")
+                button.setProperty("position", last_pos)
 
             else:
                 button.setProperty("position", "center")
@@ -255,8 +263,6 @@ class MRadioButtonGroup(MButtonGroupBase):
         if button:
             button.setChecked(True)
             self.sig_checked_changed.emit(value)
-        else:
-            print("error")
 
     def get_dayu_checked(self):
         return self._button_group.checkedId()
@@ -307,8 +313,6 @@ class MToolButtonGroup(MButtonGroupBase):
         if button:
             button.setChecked(True)
             self.sig_checked_changed.emit(value)
-        else:
-            print("error")
 
     def get_dayu_checked(self):
         return self._button_group.checkedId()

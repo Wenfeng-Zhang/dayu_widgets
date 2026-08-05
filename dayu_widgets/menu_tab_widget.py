@@ -1,8 +1,8 @@
 """A Navigation menu"""
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -52,8 +52,9 @@ class MBlockButtonGroup(MButtonGroupBase):
     def set_dayu_checked(self, value):
         """Set current checked button's id"""
         button = self._button_group.button(value)
-        button.setChecked(True)
-        self.sig_checked_changed.emit(value)
+        if button is not None and not button.isChecked():
+            button.setChecked(True)
+            self.sig_checked_changed.emit(value)
 
     def get_dayu_checked(self):
         """Get current checked button's id"""

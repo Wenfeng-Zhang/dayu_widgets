@@ -3,8 +3,8 @@ MDivider
 """
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.label import MLabel
@@ -104,3 +104,7 @@ class MDivider(QtWidgets.QWidget):
     def vertical(cls):
         """Create a vertical divider"""
         return cls(orientation=QtCore.Qt.Vertical)
+
+    @property
+    def text_label(self):
+        return self._text_label

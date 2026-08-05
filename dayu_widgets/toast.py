@@ -3,8 +3,8 @@ MToast
 """
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -107,46 +107,58 @@ class MToast(QtWidgets.QWidget):
         self._opacity_ani.start()
 
     def _get_center_position(self, parent):
-        parent_geo = parent.geometry()
-        pos = parent_geo.topLeft() if parent.parent() is None else parent.mapToGlobal(parent_geo.topLeft())
-        offset = 0
-        for child in parent.children():
-            if isinstance(child, MToast) and child.isVisible():
-                offset = max(offset, child.y())
+        if parent is None:
+            screen = QtWidgets.QApplication.primaryScreen()
+            if screen is None:
+                return
+            parent_geo = screen.availableGeometry()
+            pos = parent_geo.topLeft()
+            offset = 0
+        else:
+            parent_geo = parent.geometry()
+            pos = (
+                parent_geo.topLeft()
+                if parent.parent() is None
+                else parent.mapToGlobal(QtCore.QPoint(0, 0))
+            )
+            offset = 0
+            for child in parent.children():
+                if isinstance(child, MToast) and child.isVisible():
+                    offset = max(offset, child.y())
         target_x = pos.x() + parent_geo.width() / 2 - self.width() / 2
-        target_y = pos.y() + parent_geo.height() / 2 - self.height() / 2
+        target_y = pos.y() + parent_geo.height() / 2 - self.height() / 2 + offset
         self.setProperty("pos", QtCore.QPoint(target_x, target_y))
 
     @classmethod
-    def info(cls, text, parent, duration=None):
+    def info(cls, text, parent=None, duration=None):
         """Show a normal toast message"""
         inst = cls(text, duration=duration, dayu_type=MToast.InfoType, parent=parent)
         inst.show()
         return inst
 
     @classmethod
-    def success(cls, text, parent, duration=None):
+    def success(cls, text, parent=None, duration=None):
         """Show a success toast message"""
         inst = cls(text, duration=duration, dayu_type=MToast.SuccessType, parent=parent)
         inst.show()
         return inst
 
     @classmethod
-    def warning(cls, text, parent, duration=None):
+    def warning(cls, text, parent=None, duration=None):
         """Show a warning toast message"""
         inst = cls(text, duration=duration, dayu_type=MToast.WarningType, parent=parent)
         inst.show()
         return inst
 
     @classmethod
-    def error(cls, text, parent, duration=None):
+    def error(cls, text, parent=None, duration=None):
         """Show an error toast message"""
         inst = cls(text, duration=duration, dayu_type=MToast.ErrorType, parent=parent)
         inst.show()
         return inst
 
     @classmethod
-    def loading(cls, text, parent):
+    def loading(cls, text, parent=None):
         """Show a toast message with loading animation.
         You should close this widget by yourself."""
         inst = cls(text, dayu_type=MToast.LoadingType, parent=parent)

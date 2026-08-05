@@ -1,8 +1,8 @@
 """MLineTabWidget"""
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -67,8 +67,9 @@ class MUnderlineButtonGroup(MButtonGroupBase):
     def set_dayu_checked(self, value):
         """Set current checked button's id"""
         button = self._button_group.button(value)
-        button.setChecked(True)
-        self.sig_checked_changed.emit(value)
+        if button is not None and not button.isChecked():
+            button.setChecked(True)
+            self.sig_checked_changed.emit(value)
 
     def get_dayu_checked(self):
         """
@@ -111,7 +112,7 @@ class MLineTabWidget(QtWidgets.QWidget):
         main_lay.addSpacing(5)
         main_lay.addWidget(self.stack_widget)
         self.setLayout(main_lay)
-        self._dayu_size = dayu_theme.default
+        self._dayu_size = dayu_theme.default_size
 
     def append_widget(self, widget):
         """

@@ -3,9 +3,9 @@ MLoading
 """
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtGui
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtGui
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme

@@ -1,6 +1,6 @@
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -70,11 +70,9 @@ class MCompleter(QtWidgets.QCompleter):
         height = height if height < max_height else max_height
 
         start_size = self.property("anim_size_start")
-        start_size = start_size if start_size else QtCore.QSize(0, 0)
+        self._set_anim_size_start(start_size if start_size else QtCore.QSize(0, 0))
         end_size = self.property("anim_size_end")
-        end_size = end_size if end_size else QtCore.QSize(width, height)
-        self._size_anim.setStartValue(start_size)
-        self._size_anim.setEndValue(end_size)
+        self._set_anim_size_end(end_size if end_size else QtCore.QSize(width, height))
 
     def start_anim(self):
         self.init_size()

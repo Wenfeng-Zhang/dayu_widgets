@@ -3,8 +3,8 @@ MBadge
 """
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import utils
@@ -99,8 +99,9 @@ class MBadge(QtWidgets.QWidget):
         self._update_number()
 
     def _update_number(self):
-        self._badge_button.setText(utils.overflow_format(self._count, self._overflow_count))
-        self._badge_button.setVisible(self._count > 0)
+        count = self._count if isinstance(self._count, int) else 0
+        self._badge_button.setText(utils.overflow_format(count, self._overflow_count))
+        self._badge_button.setVisible(count > 0)
         self._dot = False
         self.style().polish(self)
 

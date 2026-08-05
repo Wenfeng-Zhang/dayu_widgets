@@ -2,9 +2,9 @@
 import functools
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtGui
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtGui
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.divider import MDivider
@@ -57,7 +57,6 @@ class MColorPaletteDialog(QtWidgets.QDialog):
         self.choose_color_button.setFixedSize(QtCore.QSize(100, 30))
         self.color_label = QtWidgets.QLabel()
         self.info_label = MLabel()
-        self.info_label.setProperty("error", True)
         color_lay = QtWidgets.QHBoxLayout()
         color_lay.addWidget(MLabel("Primary Color:"))
         color_lay.addWidget(self.choose_color_button)

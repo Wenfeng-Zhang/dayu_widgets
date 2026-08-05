@@ -4,8 +4,8 @@
 import functools
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -40,10 +40,15 @@ class MPage(QtWidgets.QWidget, MFieldMixin):
             ],
         )
         self.register_field("total", 0)
-        self.register_field("current_page", 0)
+        # 与 _current_page_spin_box.setMinimum(1) 保持一致，
+        # 否则 field(0) 与 spinbox(1) 不一致会导致首次翻页不触发 valueChanged
+        self.register_field("current_page", 1)
         self.register_field(
             "total_page",
-            lambda: utils.get_total_page(self.field("total"), self.field("page_size_selected")),
+            lambda: max(
+                1,
+                utils.get_total_page(self.field("total"), self.field("page_size_selected")),
+            ),
         )
         self.register_field("total_page_text", lambda: str(self.field("total_page")))
         self.register_field(
@@ -110,11 +115,14 @@ class MPage(QtWidgets.QWidget, MFieldMixin):
     def set_total(self, value):
         """Set page component total count."""
         self.set_field("total", value)
-        self.set_field("current_page", 1)
+        # 页码越界时钳制到最后一页（而非无条件回第 1 页），避免翻页后被刷新打断
+        total_page = self.field("total_page")
+        if self.field("current_page") > total_page:
+            self.set_field("current_page", max(1, total_page))
 
     def _slot_change_current_page(self, offset):
+        # 通过 set_field 触发 spinbox valueChanged -> _emit_page_changed，避免重复发射
         self.set_field("current_page", self.field("current_page") + offset)
-        self._emit_page_changed()
 
     def set_page_config(self, data_list):
         """Set page component per page settings."""
@@ -124,4 +132,20 @@ class MPage(QtWidgets.QWidget, MFieldMixin):
         )
 
     def _emit_page_changed(self):
-        self.sig_page_changed.emit(self.field("page_size_selected"), self.field("current_page"))
+        # 防止 set_field -> valueChanged -> _emit_page_changed 的再入导致信号重复发射
+        if getattr(self, "_emitting_page_changed", False):
+            return
+        self._emitting_page_changed = True
+        try:
+            # 以 spinbox 实际值为准：用户手动改 spinbox 时 field 可能尚未同步
+            # （valueChanged 先连接 _emit_page_changed，后连接 bind 的 _slot_changed_from_user）
+            current_page = self._current_page_spin_box.value()
+            self.set_field("current_page", current_page)
+            total_page = self.field("total_page")
+            if current_page > total_page:
+                # 钳制页码到合法范围（例如切换 page_size 后总页数变小）
+                current_page = max(1, total_page)
+                self.set_field("current_page", current_page)
+            self.sig_page_changed.emit(self.field("page_size_selected"), current_page)
+        finally:
+            self._emitting_page_changed = False

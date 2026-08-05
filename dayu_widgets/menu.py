@@ -4,9 +4,9 @@ import os
 import re
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtGui
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtGui
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.mixin import property_mixin
@@ -18,13 +18,8 @@ import dayu_widgets.utils as utils
 PYSIDE6 = os.environ.get("QT_API") == "pyside6"
 
 
-class CompatStyle(QtWidgets.QProxyStyle):
+class CompatStyle(object):
     """PySide2 PySide6"""
-
-    def __init__(self, style=None):
-        super(CompatStyle, self).__init__(style)
-        self.style = style
-
     @property
     def State_None(self):
         if PYSIDE6:
@@ -140,7 +135,7 @@ class ScrollableMenuBase(QtWidgets.QMenu):
         super(ScrollableMenuBase, self).__init__(*args, **kwargs)
         self._maximumHeight = self.maximumHeight()
         self._actionRects = []
-        self._compat_style = CompatStyle(self.style())
+        self._compat_style = CompatStyle()
 
         self.scrollTimer = QtCore.QTimer(parent=self, interval=50, singleShot=True)
         self.scrollTimer.timeout.connect(self.checkScroll)
@@ -377,7 +372,8 @@ class ScrollableMenuBase(QtWidgets.QMenu):
 
     def wheelEvent(self, event):
         if not self.isScrollable():
-            return
+            # 非 scrollable 时交给基类处理，避免吞掉滚轮事件
+            return super(ScrollableMenuBase, self).wheelEvent(event)
         self.delayTimer.stop()
         if event.angleDelta().y() < 0:
             self.scrollBy(self.defaultItemHeight)
@@ -451,6 +447,7 @@ class ScrollableMenuBase(QtWidgets.QMenu):
         qp.save()
         qp.translate(0, -offset)
         # offset translation is required in order to allow correct fade animations
+        actionRect = QtCore.QRect()
         for action, actionRect in self.iterActionRects():
             actionRect = self.translatedActionGeometry(action)
             if actionRect.bottom() < topEdge:
@@ -583,7 +580,8 @@ class SearchableMenuBase(ScrollableMenuBase):
         flags = 0
         for m in self.property("search_re") or "":
             flags |= getattr(re, m.upper(), 0)
-        search_reg = re.compile(r".*%s.*" % text, flags)
+        # 用户输入按字面量匹配，需转义正则元字符
+        search_reg = re.compile(r".*%s.*" % re.escape(text), flags)
         self._update_search(search_reg)
 
     def _update_search(self, search_reg, parent_menu=None):
@@ -644,6 +642,11 @@ class MMenu(SearchableMenuBase):
     def set_load_callback(self, func):
         assert callable(func)
         self._load_data_func = func
+        # 防止重复调用时重复连接 aboutToShow
+        try:
+            self.aboutToShow.disconnect(self.slot_fetch_data)
+        except (RuntimeError, TypeError):
+            pass
         self.aboutToShow.connect(self.slot_fetch_data)
 
     def slot_fetch_data(self):
@@ -727,3 +730,35 @@ class MMenu(SearchableMenuBase):
 
     def set_loader(self, func):
         self._load_data_func = func
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+
+    # 创建测试窗口
+    window = QtWidgets.QMainWindow()
+    window.setWindowTitle("Menu Test")
+    window.resize(400, 300)
+
+    # 创建菜单
+    menu_bar = QtWidgets.QMenuBar()
+    test_menu = MMenu(title="Test Menu", parent=window)
+
+    # 添加测试数据
+    test_data = [
+        {"label": f"Item {i}", "value": i} for i in range(20)
+    ]
+    test_menu.set_data(test_data)
+
+    menu_bar.addMenu(test_menu)
+    window.setMenuBar(menu_bar)
+
+    # 测试信号
+    test_menu.sig_value_changed.connect(lambda x: print(f"Selected: {x}"))
+
+    window.show()
+
+    # 确保程序退出时正确清理
+    sys.exit(app.exec_())
+

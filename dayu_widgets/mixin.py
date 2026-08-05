@@ -3,9 +3,9 @@ mixin decorators to add Qt class feature.
 """
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtGui
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtGui
+from Qt import QtWidgets
 
 
 def property_mixin(cls):
@@ -86,7 +86,7 @@ def focus_shadow_mixin(cls):
 
             shadow_effect = QtWidgets.QGraphicsDropShadowEffect(self)
             dayu_type = self.property("dayu_type")
-            color = vars(dayu_theme).get("{}_color".format(dayu_type or "primary"))
+            color = vars(dayu_theme).get("{}_color".format(dayu_type or "primary")) or dayu_theme.primary_color
             shadow_effect.setColor(QtGui.QColor(color))
             shadow_effect.setOffset(0, 0)
             shadow_effect.setBlurRadius(5)
@@ -121,8 +121,8 @@ def hover_shadow_mixin(cls):
             from dayu_widgets import dayu_theme
 
             shadow_effect = QtWidgets.QGraphicsDropShadowEffect(self)
-            dayu_type = self.property("type")
-            color = vars(dayu_theme).get("{}_color".format(dayu_type or "primary"))
+            dayu_type = self.property("dayu_type")
+            color = vars(dayu_theme).get("{}_color".format(dayu_type or "primary")) or dayu_theme.primary_color
             shadow_effect.setColor(QtGui.QColor(color))
             shadow_effect.setOffset(0, 0)
             shadow_effect.setBlurRadius(5)
@@ -201,7 +201,11 @@ def stacked_animation_mixin(cls):
     def _disable_opacity(self):
         # 如果不关掉effect，会跟子控件的 effect 或 paintEvent 冲突引起 crash
         # QPainter::begin: A paint device can only be painted by one painter at a time.
-        self.currentWidget().graphicsEffect().setEnabled(False)
+        widget = self.currentWidget()
+        if widget is not None:
+            effect = widget.graphicsEffect()
+            if effect is not None:
+                effect.setEnabled(False)
 
     setattr(cls, "__init__", _new_init)
     setattr(cls, "_play_anim", _play_anim)

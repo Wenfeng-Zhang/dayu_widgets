@@ -1,5 +1,6 @@
 # Import built-in modules
 import functools
+import itertools
 
 
 class MFieldMixin(object):
@@ -21,7 +22,7 @@ class MFieldMixin(object):
                 "bind": [],
             }
         else:
-            self.props_dict[name] = {"value": getter, "require": required, "bind": []}
+            self.props_dict[name] = {"value": getter, "required": required, "bind": []}
         return
 
     def bind(self, data_name, widget, qt_property, index=None, signal=None, callback=None):
@@ -32,10 +33,14 @@ class MFieldMixin(object):
             "index": index,
             "callback": callback,
         }
-        if data_name in self.computed_dict:
+        if data_name in (self.computed_dict or {}):
             self.computed_dict[data_name]["bind"].append(data_dict)
-        else:
+        elif data_name in (self.props_dict or {}):
             self.props_dict[data_name]["bind"].append(data_dict)
+        else:
+            raise KeyError(
+                'There is no field named "{}". Please call register_field() before bind().'.format(data_name)
+            )
         if signal:  # 用户操作绑定数据
             slot = functools.partial(self._slot_changed_from_user, data_dict)
             getattr(widget, signal).connect(slot)
@@ -43,7 +48,7 @@ class MFieldMixin(object):
         return widget
 
     def fields(self):
-        return self.props_dict.keys() + self.computed_dict.keys()
+        return list((self.props_dict or {}).keys()) + list((self.computed_dict or {}).keys())
 
     def field(self, name):
         if name in self.props_dict:
@@ -80,8 +85,12 @@ class MFieldMixin(object):
             map(str, [b.data().decode() for b in widget.dynamicPropertyNames()])
         ):
             widget.setProperty(widget_property, value)
-        else:
+        elif hasattr(widget, "set_field"):
             widget.set_field(widget_property, value)
+        else:
+            # 属性既不是 Qt 元属性，widget 也没有自定义 set_field，
+            # 退化为动态属性写入（至少不崩溃，若 widget 监听了 DynamicPropertyChange 仍会生效）
+            widget.setProperty(widget_property, value)
         if callable(callback):
             callback()
 
@@ -107,12 +116,15 @@ class MFieldMixin(object):
             old_value = self.field(data_name)
             old_value[index] = ui_value
             self.set_field(data_name, old_value)
-        if data_name in self.props_dict.items():
+        if data_name in (self.props_dict or {}):
             self._slot_prop_changed(data_name)
 
     def _is_complete(self):
-        for name, data_dict in self.computed_dict.items() + self.props_dict.items():
-            if data_dict["required"]:
+        for name, data_dict in itertools.chain(
+            (self.computed_dict or {}).items(),
+            (self.props_dict or {}).items(),
+        ):
+            if data_dict.get("required"):
                 if not self.field(name):
                     return False
         return True

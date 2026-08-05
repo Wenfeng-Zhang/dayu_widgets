@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-# Import future modules
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 # Import built-in modules
 import os
 import sys
 
 
-DEFAULT_STATIC_FOLDER = os.path.join(sys.modules[__name__].__path__[0], "static")
+try:
+    DEFAULT_STATIC_FOLDER = os.path.join(sys.modules[__name__].__path__[0], "static")
+except AttributeError:
+    # 直接以脚本方式运行 __init__.py 时没有 __path__，回退到基于 __file__ 的路径
+    DEFAULT_STATIC_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 CUSTOM_STATIC_FOLDERS = []
 # Import local modules
 from dayu_widgets.theme import MTheme
@@ -64,6 +63,7 @@ from dayu_widgets.progress_bar import MProgressBar
 from dayu_widgets.progress_circle import MProgressCircle
 from dayu_widgets.push_button import MPushButton
 from dayu_widgets.radio_button import MRadioButton
+from dayu_widgets.sequence_file import MSequenceFile
 from dayu_widgets.slider import MSlider
 from dayu_widgets.spin_box import MDateEdit
 from dayu_widgets.spin_box import MDateTimeEdit
@@ -122,6 +122,7 @@ __all__ = [
     "MProgressCircle",
     "MPushButton",
     "MRadioButton",
+    "MSequenceFile",
     "MSlider",
     "MDateEdit",
     "MDateTimeEdit",

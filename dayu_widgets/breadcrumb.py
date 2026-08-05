@@ -3,7 +3,7 @@ MBreadcrumb
 """
 
 # Import third-party modules
-from qtpy import QtWidgets
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.label import MLabel
@@ -50,7 +50,7 @@ class MBreadcrumb(QtWidgets.QWidget):
         if data_dict.get("svg"):
             button.svg(data_dict.get("svg"))
         if data_dict.get("tooltip"):
-            button.setProperty("toolTip", data_dict.get("tooltip"))
+            button.setToolTip(data_dict.get("tooltip"))
         if data_dict.get("clicked"):
             button.clicked.connect(data_dict.get("clicked"))
         if data_dict.get("text"):

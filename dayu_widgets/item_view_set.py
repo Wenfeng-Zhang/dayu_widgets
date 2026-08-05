@@ -1,6 +1,6 @@
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.item_model import MSortFilterModel
@@ -60,7 +60,6 @@ class MItemViewSet(QtWidgets.QWidget):
     def set_header_list(self, header_list):
         self.source_model.set_header_list(header_list)
         self.sort_filter_model.set_header_list(header_list)
-        self.sort_filter_model.setSourceModel(self.source_model)
         self.source_model.clear()
         self.item_view.set_header_list(header_list)
 
@@ -81,3 +80,23 @@ class MItemViewSet(QtWidgets.QWidget):
     def insert_widget(self, widget):
         """Use can insert extra widget into search layout."""
         self._search_lay.insertWidget(0, widget)
+
+    @property
+    def search_lay(self):
+        return self._search_lay
+
+    @property
+    def search_line_edit(self):
+        return self._search_line_edit
+
+
+if __name__ == "__main__":
+    # Import local modules
+
+    from dayu_widgets import dayu_theme
+    from dayu_widgets.qt import application
+
+    with application() as app:
+        test = MItemViewSet()
+        dayu_theme.apply(test)
+        test.show()

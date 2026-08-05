@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-# Import future modules
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 # Import built-in modules
 import os
 import sys
@@ -69,8 +64,8 @@ def main():
         test = MDemo()
         dayu_theme.apply(test)
         test.show()
-        # Return the app's exit code (this will implicitly use the app variable)
-        return app.exec_()
+        # application() 在无 QApplication 实例时会自动 exec_，这里不能再 exec_（否则双重事件循环挂起）
+        return 0
 
 
 if __name__ == "__main__":

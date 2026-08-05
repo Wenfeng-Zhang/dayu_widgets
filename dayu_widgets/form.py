@@ -1,5 +1,5 @@
 # Import third-party modules
-from qtpy import QtWidgets
+from Qt import QtWidgets
 
 
 class MForm(QtWidgets.QWidget):
@@ -18,6 +18,7 @@ class MForm(QtWidgets.QWidget):
             self._main_layout = QtWidgets.QFormLayout()
         self._model = None
         self._label_list = []
+        self.setLayout(self._main_layout)
 
     def set_model(self, m):
         self._model = m
@@ -25,7 +26,8 @@ class MForm(QtWidgets.QWidget):
     def set_label_align(self, align):
         for label in self._label_list:
             label.setAlignment(align)
-        self._main_layout.setLabelAlignment(align)
+        if isinstance(self._main_layout, QtWidgets.QFormLayout):
+            self._main_layout.setLabelAlignment(align)
 
     @classmethod
     def horizontal(cls):

@@ -1,9 +1,9 @@
 """MProgressCircle"""
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtGui
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtGui
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -53,6 +53,14 @@ class MProgressCircle(QtWidgets.QProgressBar):
         self.setTextVisible(False)
         if not widget.styleSheet():
             widget.setStyleSheet("background:transparent")
+        # 移除上一次设置的自定义 widget，避免控件堆积
+        for index in reversed(range(self._main_lay.count())):
+            item = self._main_lay.itemAt(index)
+            old_widget = item.widget()
+            if old_widget is not None and old_widget is not self._default_label:
+                self._main_lay.removeItem(item)
+                old_widget.setParent(None)
+                old_widget.deleteLater()
         self._main_lay.addWidget(widget)
 
     def get_dayu_width(self):

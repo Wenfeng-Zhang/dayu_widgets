@@ -1,6 +1,6 @@
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -30,9 +30,17 @@ class MComboBoxSearchMixin(object):
 
         edit = self.lineEdit()
         edit.setReadOnly(False)
-        edit.returnPressed.disconnect()
+        # 注意：不要对 returnPressed 做无参 disconnect —— 那会断开该信号的全部连接
+        # （含 QComboBox 内部与用户连接）。search() 本身不连接该信号，无需清理。
+        # 防止重复调用 search() 时重复连接 textEdited
+        try:
+            edit.textEdited.disconnect(self.filter_model.setFilterFixedString)
+        except (RuntimeError, TypeError):
+            pass
         edit.textEdited.connect(self.filter_model.setFilterFixedString)
-        self.completer.activated.connect(lambda t: t and self.setCurrentIndex(self.findText(t)))
+        if not getattr(self, "_search_activated_connected", False):
+            self.completer.activated.connect(lambda t: t and self.setCurrentIndex(self.findText(t)))
+            self._search_activated_connected = True
 
     def _set_searchable(self, value):
         """search property to True then trigger search"""
@@ -90,6 +98,8 @@ class MComboBox(MComboBoxSearchMixin, QtWidgets.QComboBox):
         self._dayu_size = value
         self.lineEdit().setProperty("dayu_size", value)
         self.style().polish(self)
+        # lineEdit 子控件也有 [dayu_size=...] 的 QSS 规则，需要单独 repolish
+        self.lineEdit().style().polish(self.lineEdit())
 
     dayu_size = QtCore.Property(int, get_dayu_size, set_dayu_size)
 
@@ -109,6 +119,12 @@ class MComboBox(MComboBoxSearchMixin, QtWidgets.QComboBox):
             self._root_menu.set_value(value)
 
     def set_menu(self, menu):
+        if self._root_menu is not None:
+            try:
+                self._root_menu.sig_value_changed.disconnect(self.sig_value_changed)
+                self._root_menu.sig_value_changed.disconnect(self.set_value)
+            except (RuntimeError, TypeError):
+                pass
         self._root_menu = menu
         self._root_menu.sig_value_changed.connect(self.sig_value_changed)
         self._root_menu.sig_value_changed.connect(self.set_value)

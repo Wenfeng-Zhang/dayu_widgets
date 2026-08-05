@@ -10,9 +10,9 @@ import math
 import os
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtGui
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtGui
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import CUSTOM_STATIC_FOLDERS
@@ -44,7 +44,7 @@ def get_static_file(path):
     )
     if os.path.isfile(full_path):
         return full_path
-    return None
+    return os.path.join(DEFAULT_STATIC_FOLDER, "icon-unknown.png")
 
 
 def from_list_to_nested_dict(input_arg, sep="/"):
@@ -60,18 +60,32 @@ def from_list_to_nested_dict(input_arg, sep="/"):
         raise TypeError("Input argument 'sep' should be str, " "but get {}".format(type(sep)))
 
     result = []
+    # 第一遍：构建完整树（叶子路径的节点暂不 pop children，
+    # 保证「既作父又作叶」的节点（如 ["a/b", "a"]）不丢子树）
     for item in input_arg:
         components = item.strip(sep).split(sep)
-        component_count = len(components)
         current = result
-        for i, comp in enumerate(components):
+        for comp in components:
             atom = next((x for x in current if x["value"] == comp), None)
             if atom is None:
                 atom = {"value": comp, "label": comp, "children": []}
                 current.append(atom)
+            elif "children" not in atom:
+                atom["children"] = []
             current = atom["children"]
-            if i == component_count - 1:
-                atom.pop("children")
+    # 第二遍：叶子路径的末节点若确无子数据才 pop children（纯叶子收尾）
+    for item in input_arg:
+        components = item.strip(sep).split(sep)
+        current = result
+        for i, comp in enumerate(components):
+            atom = next((x for x in current if x["value"] == comp), None)
+            if atom is None:
+                break
+            if i == len(components) - 1:
+                if not atom.get("children"):
+                    atom.pop("children", None)
+            else:
+                current = atom.get("children", [])
     return result
 
 
@@ -87,6 +101,51 @@ def fade_color(color, alpha):
     return "rgba({}, {}, {}, {})".format(q_color.red(), q_color.green(), q_color.blue(), alpha)
 
 
+# Ant Design color palette algorithm constants
+_HUE_STEP = 2
+_SATURATION_STEP = 16
+_SATURATION_STEP2 = 5
+_BRIGHTNESS_STEP1 = 5
+_BRIGHTNESS_STEP2 = 15
+_LIGHT_COLOR_COUNT = 5
+_DARK_COLOR_COUNT = 4
+
+
+def _get_hue(color, i, is_light):
+    h_comp = color.hue()
+    if 60 <= h_comp <= 240:
+        hue = h_comp - _HUE_STEP * i if is_light else h_comp + _HUE_STEP * i
+    else:
+        hue = h_comp + _HUE_STEP * i if is_light else h_comp - _HUE_STEP * i
+    if hue < 0:
+        hue += 359
+    elif hue >= 359:
+        hue -= 359
+    return hue / 359.0
+
+
+def _get_saturation(color, i, is_light):
+    s_comp = color.saturationF() * 100
+    if is_light:
+        saturation = s_comp - _SATURATION_STEP * i
+    elif i == _DARK_COLOR_COUNT:
+        saturation = s_comp + _SATURATION_STEP
+    else:
+        saturation = s_comp + _SATURATION_STEP2 * i
+    saturation = min(100.0, saturation)
+    if is_light and i == _LIGHT_COLOR_COUNT and saturation > 10:
+        saturation = 10
+    saturation = max(6.0, saturation)
+    return round(saturation * 10) / 1000.0
+
+
+def _get_value(color, i, is_light):
+    v_comp = color.valueF()
+    if is_light:
+        return min((v_comp * 100 + _BRIGHTNESS_STEP1 * i) / 100, 1.0)
+    return max((v_comp * 100 - _BRIGHTNESS_STEP2 * i) / 100, 0.0)
+
+
 def generate_color(primary_color, index):
     """
     Reference to ant-design color system algorithm.
@@ -98,49 +157,9 @@ def generate_color(primary_color, index):
     # https://github.com/ant-design/ant-design/blob/master/components/style/color/colorPalette.less
     # https://zhuanlan.zhihu.com/p/32422584
 
-    hue_step = 2
-    saturation_step = 16
-    saturation_step2 = 5
-    brightness_step1 = 5
-    brightness_step2 = 15
-    light_color_count = 5
-    dark_color_count = 4
-
-    def _get_hue(color, i, is_light):
-        h_comp = color.hue()
-        if 60 <= h_comp <= 240:
-            hue = h_comp - hue_step * i if is_light else h_comp + hue_step * i
-        else:
-            hue = h_comp + hue_step * i if is_light else h_comp - hue_step * i
-        if hue < 0:
-            hue += 359
-        elif hue >= 359:
-            hue -= 359
-        return hue / 359.0
-
-    def _get_saturation(color, i, is_light):
-        s_comp = color.saturationF() * 100
-        if is_light:
-            saturation = s_comp - saturation_step * i
-        elif i == dark_color_count:
-            saturation = s_comp + saturation_step
-        else:
-            saturation = s_comp + saturation_step2 * i
-        saturation = min(100.0, saturation)
-        if is_light and i == light_color_count and saturation > 10:
-            saturation = 10
-        saturation = max(6.0, saturation)
-        return round(saturation * 10) / 1000.0
-
-    def _get_value(color, i, is_light):
-        v_comp = color.valueF()
-        if is_light:
-            return min((v_comp * 100 + brightness_step1 * i) / 100, 1.0)
-        return max((v_comp * 100 - brightness_step2 * i) / 100, 0.0)
-
     light = index <= 6
     hsv_color = QtGui.QColor(primary_color) if isinstance(primary_color, str) else primary_color
-    index = light_color_count + 1 - index if light else index - light_color_count - 1
+    index = _LIGHT_COLOR_COUNT + 1 - index if light else index - _LIGHT_COLOR_COUNT - 1
     return QtGui.QColor.fromHsvF(
         _get_hue(hsv_color, index, light),
         _get_saturation(hsv_color, index, light),
@@ -246,14 +265,7 @@ def _(input_list):
 
 @display_formatter.register(str)
 def _(input_str):
-    # ['utf-8', 'windows-1250', 'windows-1252', 'ISO-8859-1']
-    return input_str.decode("windows-1252")
-    # return obj.decode()
-
-
-@display_formatter.register(str)
-def _(input_unicode):
-    return input_unicode
+    return input_str
 
 
 @display_formatter.register(type(None))
@@ -294,6 +306,8 @@ def font_formatter(setting_dict):
     :param bold: font style bold
     :return: a QFont instance with given style
     """
+    if setting_dict is None:
+        return None
     _font = QtGui.QFont()
     _font.setUnderline(setting_dict.get("underline") or False)
     _font.setBold(setting_dict.get("bold") or False)
@@ -453,6 +467,9 @@ def add_settings(organization, app_name, event_name="closeEvent"):
         return old_event(event)
 
     def bind(self, attr, widget, property, default=None, formatter=None):
+        # 首次调用时把共享类列表拷贝为实例属性，避免多个实例互相污染
+        if "_bind_data" not in self.__dict__:
+            self._bind_data = list(type(self)._bind_data)
         old_setting_dict = read_settings(organization, app_name)
         value = old_setting_dict.get(attr, default)
         if callable(formatter):  # 二次处理 value，比如存入的 bool，读取后要恢复成 bool
@@ -472,6 +489,8 @@ def add_settings(organization, app_name, event_name="closeEvent"):
         self._bind_data.append((attr, widget, property))
 
     def unbind(self, attr, widget, property):
+        if "_bind_data" not in self.__dict__:
+            self._bind_data = list(type(self)._bind_data)
         self.write_settings()
         self._bind_data.remove((attr, widget, property))
 
@@ -487,14 +506,6 @@ def add_settings(organization, app_name, event_name="closeEvent"):
         return cls
 
     return wrapper
-
-
-def get_fit_geometry():
-    geo = next(
-        (screen.availableGeometry() for screen in QtWidgets.QApplication.screens()),
-        None,
-    )
-    return QtCore.QRect(geo.width() / 4, geo.height() / 4, geo.width() / 2, geo.height() / 2)
 
 
 def convert_to_round_pixmap(orig_pix):
@@ -547,14 +558,3 @@ def generate_text_pixmap(width, height, text, alignment=QtCore.Qt.AlignCenter, b
     return pix_map
 
 
-def get_color_icon(color, size=24):
-    scale_x, y = get_scale_factor()
-    pix = QtGui.QPixmap(size * scale_x, size * scale_x)
-    q_color = color
-    if isinstance(color, str):
-        if color.startswith("#"):
-            q_color = QtGui.QColor(str)
-        elif color.count(",") == 2:
-            q_color = QtGui.QColor(*tuple(map(int, color.split(","))))
-    pix.fill(q_color)
-    return QtGui.QIcon(pix)

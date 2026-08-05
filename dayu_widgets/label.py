@@ -1,6 +1,6 @@
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -21,6 +21,8 @@ class MLabel(QtWidgets.QLabel):
     H2Level = 2
     H3Level = 3
     H4Level = 4
+    H5Level = 5
+    H6Level = 6
 
     def __init__(self, text="", parent=None, flags=QtCore.Qt.Widget):
         super(MLabel, self).__init__(text, parent, flags)
@@ -109,7 +111,7 @@ class MLabel(QtWidgets.QLabel):
     dayu_strong = QtCore.Property(bool, get_dayu_strong, set_dayu_strong)
     dayu_mark = QtCore.Property(bool, get_dayu_mark, set_dayu_mark)
     dayu_code = QtCore.Property(bool, get_dayu_code, set_dayu_code)
-    dayu_elide_mod = QtCore.Property(QtCore.Qt.TextElideMode, get_dayu_code, set_dayu_code)
+    dayu_elide_mod = QtCore.Property(QtCore.Qt.TextElideMode, get_elide_mode, set_elide_mode)
 
     def minimumSizeHint(self):
         return QtCore.QSize(1, self.fontMetrics().height())
@@ -182,6 +184,16 @@ class MLabel(QtWidgets.QLabel):
     def h4(self):
         """Set QLabel with h4 type."""
         self.set_dayu_level(MLabel.H4Level)
+        return self
+
+    def h5(self):
+        """Set QLabel with h5 type."""
+        self.set_dayu_level(MLabel.H5Level)
+        return self
+
+    def h6(self):
+        """Set QLabel with h6 type."""
+        self.set_dayu_level(MLabel.H6Level)
         return self
 
     def secondary(self):

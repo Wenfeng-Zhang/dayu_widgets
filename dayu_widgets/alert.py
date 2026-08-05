@@ -6,8 +6,8 @@ MAlert class.
 import functools
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -70,7 +70,9 @@ class MAlert(QtWidgets.QWidget):
         """Display the information type icon or not."""
         self._icon_label.setVisible(show_icon)
 
-    def _set_dayu_text(self):
+    def _set_dayu_text(self, value=None):
+        if value is not None:
+            self._dayu_text = value
         self._content_label.setText(self._dayu_text)
         self.setVisible(bool(self._dayu_text))
 
@@ -84,7 +86,9 @@ class MAlert(QtWidgets.QWidget):
             raise TypeError(msg.format(type(value)))
         self._set_dayu_text()
 
-    def _set_dayu_type(self):
+    def _set_dayu_type(self, value=None):
+        if value is not None:
+            self._dayu_type = value
         self._icon_label.set_dayu_image(
             MPixmap(
                 "{}_fill.svg".format(self._dayu_type),

@@ -5,8 +5,8 @@ import sys
 from functools import partial
 from itertools import zip_longest
 
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 from dayu_widgets import utils
 from dayu_widgets.static import request_file
@@ -56,7 +56,7 @@ def parse_path(path):
     """
     return {
         "name": os.path.basename(path) or path,
-        "icon": utils.icon_formatter(request_file("folder_line.svg")),
+        "icon": utils.icon_formatter(request_file("icon-browser.png")),
         "get_children": lambda x: [
             parse_path(os.path.join(path, i)) for i in os.listdir(path) if os.path.isdir(os.path.join(path, i))
         ],

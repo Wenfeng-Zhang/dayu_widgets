@@ -6,8 +6,8 @@ Get the user input is a text field
 import functools
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -90,16 +90,25 @@ class MLineEdit(QtWidgets.QLineEdit):
         if self._prefix_widget:
             index = self._main_layout.indexOf(self._prefix_widget)
             self._main_layout.takeAt(index)
-            self._prefix_widget.setVisible(False)
+            old = self._prefix_widget
+            self._prefix_widget = None
+            old.setParent(None)
+            old.deleteLater()
+            # 还原之前为旧控件增加的左 margin，避免多次设置只增不减
+            margin = self.textMargins()
+            margin.setLeft(margin.left() - getattr(self, "_prefix_width", 0))
+            self.setTextMargins(margin)
         # if isinstance(widget, MPushButton):
         widget.setProperty("combine", "horizontal")
         widget.setProperty("position", "left")
         if hasattr(widget, "set_dayu_size"):
             widget.set_dayu_size(self._dayu_size)
 
+        widget_width = widget.sizeHint().width()
         margin = self.textMargins()
-        margin.setLeft(margin.left() + widget.width())
+        margin.setLeft(margin.left() + widget_width)
         self.setTextMargins(margin)
+        self._prefix_width = widget_width
 
         self._main_layout.insertWidget(0, widget)
         self._prefix_widget = widget
@@ -114,29 +123,62 @@ class MLineEdit(QtWidgets.QLineEdit):
         if self._suffix_widget:
             index = self._main_layout.indexOf(self._suffix_widget)
             self._main_layout.takeAt(index)
-            self._suffix_widget.setVisible(False)
+            old = self._suffix_widget
+            self._suffix_widget = None
+            old.setParent(None)
+            old.deleteLater()
+            # 还原之前为旧控件增加的右 margin，避免多次设置只增不减
+            margin = self.textMargins()
+            margin.setRight(margin.right() - getattr(self, "_suffix_width", 0))
+            self.setTextMargins(margin)
         # if isinstance(widget, MPushButton):
         widget.setProperty("combine", "horizontal")
         widget.setProperty("position", "right")
         if hasattr(widget, "set_dayu_size"):
             widget.set_dayu_size(self._dayu_size)
 
+        widget_width = widget.sizeHint().width()
         margin = self.textMargins()
-        margin.setRight(margin.right() + widget.width())
+        margin.setRight(margin.right() + widget_width)
         self.setTextMargins(margin)
+        self._suffix_width = widget_width
         self._main_layout.addWidget(widget)
         self._suffix_widget = widget
         return widget
 
+    def get_data(self):
+        return super(MLineEdit, self).text()
+
+    def _append_history(self, text):
+        """Save text to history with a bounded size (avoid unbounded memory growth)."""
+        history = self.property("history") or ""
+        lines = (history + "\n" + text).split("\n")
+        if len(lines) > 100:
+            lines = lines[-100:]
+        self.setProperty("history", "\n".join(lines))
+
+    def set_data(self, text):
+        """Override setText save text to history"""
+        self._append_history(text)
+        return super(MLineEdit, self).setText(text)
+
     def setText(self, text):
         """Override setText save text to history"""
-        self.setProperty("history", "{}\n{}".format(self.property("history"), text))
+        self._append_history(text)
         return super(MLineEdit, self).setText(text)
 
     def clear(self):
         """Override clear to clear history"""
         self.setProperty("history", "")
         return super(MLineEdit, self).clear()
+
+    def keyPressEvent(self, event):
+        """Override keyPressEvent to start delay timer"""
+        if event.key() not in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Tab]:
+            if self._delay_timer.isActive():
+                self._delay_timer.stop()
+            self._delay_timer.start()
+        super(MLineEdit, self).keyPressEvent(event)
 
     def search(self):
         """Add a search icon button for MLineEdit."""
@@ -152,6 +194,7 @@ class MLineEdit(QtWidgets.QLineEdit):
         @QtCore.Slot()
         def _slot_show_detail(self):
             dialog = QtWidgets.QTextEdit(self)
+            dialog.setAttribute(QtCore.Qt.WA_DeleteOnClose)
             dialog.setReadOnly(True)
             geo = QtWidgets.QApplication.primaryScreen().geometry()
             dialog.setGeometry(geo.width() / 2, geo.height() / 2, geo.width() / 4, geo.height() / 4)
@@ -235,3 +278,14 @@ class MLineEdit(QtWidgets.QLineEdit):
         """Set MLineEdit to password echo mode"""
         self.setEchoMode(QtWidgets.QLineEdit.Password)
         return self
+
+
+if __name__ == '__main__':
+    import sys
+
+    app = QtWidgets.QApplication(sys.argv)
+    test = MLineEdit()
+    test.error()
+    # test.search_engine()
+    test.show()
+    sys.exit(app.exec_())

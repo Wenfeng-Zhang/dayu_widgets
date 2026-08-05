@@ -1,8 +1,8 @@
 """MDockWidget"""
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 
 class MDockWidget(QtWidgets.QDockWidget):

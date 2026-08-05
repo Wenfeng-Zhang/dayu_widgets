@@ -1,6 +1,6 @@
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -54,7 +54,7 @@ class MCard(QtWidgets.QWidget):
         self.setLayout(self._main_lay)
 
     def get_more_button(self):
-        return self._extra_button
+        return getattr(self, "_extra_button", None)
 
     def set_widget(self, widget):
         self._content_layout.addWidget(widget)
@@ -140,3 +140,19 @@ class MMeta(QtWidgets.QWidget):
             self._cover_label.setVisible(True)
         else:
             self._cover_label.setVisible(False)
+
+        self._dayu_double_clicked_callback = data_dict.get('doubleClicked')
+
+    def mouseDoubleClickEvent(self, event):
+        """双击回调：对实例 monkey-patch 该方法在 PySide2/6 下不会进入虚表，
+        必须定义在类上才会被 Qt 调用。"""
+        callback = getattr(self, "_dayu_double_clicked_callback", None)
+        if callable(callback):
+            callback()
+        super(MMeta, self).mouseDoubleClickEvent(event)
+
+
+
+if __name__ == '__main__':
+    pass
+

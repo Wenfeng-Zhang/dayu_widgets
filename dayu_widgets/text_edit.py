@@ -1,6 +1,6 @@
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 
 class MSizeGrip(QtWidgets.QSizeGrip):
@@ -11,7 +11,6 @@ class MSizeGrip(QtWidgets.QSizeGrip):
 class MTextEdit(QtWidgets.QTextEdit):
     def __init__(self, parent=None):
         super(MTextEdit, self).__init__(parent)
-        self.setWindowFlags(QtCore.Qt.SubWindow)
         self._size_grip = MSizeGrip(self)
         layout = QtWidgets.QGridLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -26,7 +25,6 @@ class MTextEdit(QtWidgets.QTextEdit):
     def _autosize_text_edit(self):
         # w = self.width()
         doc = self.document()
-        print(self.width(), doc.lineCount(), doc.idealWidth())
 
     def resizeable(self):
         """Show the size grip on bottom right. User can use it to resize MTextEdit"""

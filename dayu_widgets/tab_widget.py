@@ -1,6 +1,6 @@
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.mixin import cursor_mixin
@@ -15,14 +15,18 @@ class MTabBar(QtWidgets.QTabBar):
 
     def tabSizeHint(self, index):
         tab_text = self.tabText(index)
+        try:
+            text_width = self.fontMetrics().horizontalAdvance(tab_text)
+        except AttributeError:
+            text_width = self.fontMetrics().width(tab_text)
         if self.tabsClosable():
             return QtCore.QSize(
-                self.fontMetrics().width(tab_text) + 70,
+                text_width + 70,
                 self.fontMetrics().height() + 20,
             )
         else:
             return QtCore.QSize(
-                self.fontMetrics().width(tab_text) + 50,
+                text_width + 50,
                 self.fontMetrics().height() + 20,
             )
 

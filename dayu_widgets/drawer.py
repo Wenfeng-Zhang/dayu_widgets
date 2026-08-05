@@ -1,8 +1,8 @@
 """MDrawer"""
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.divider import MDivider
@@ -17,9 +17,13 @@ class MDrawer(QtWidgets.QWidget):
     """
 
     LeftPos = "left"
+    ToLeftPos = "to_left"
     RightPos = "right"
+    ToRightPos = "to_right"
     TopPos = "top"
+    ToTopPos = "to_top"
     BottomPos = "bottom"
+    ToBottomPos = "to_bottom"
 
     sig_closed = QtCore.Signal()
 
@@ -35,7 +39,9 @@ class MDrawer(QtWidgets.QWidget):
         # self._title_label.set_elide_mode(Qt.ElideRight)
         self._title_label.setText(title)
 
-        self._close_button = MToolButton(parent=self).icon_only().svg("close_line.svg").small()
+        self._close_button = (
+            MToolButton(parent=self).icon_only().svg("close_line.svg").small()
+        )
         self._close_button.clicked.connect(self.close)
         self._close_button.setVisible(closable or False)
 
@@ -59,6 +65,7 @@ class MDrawer(QtWidgets.QWidget):
         self.setLayout(self._main_lay)
 
         self._position = position
+        self.set_dayu_position(position)
 
         self._close_timer = QtCore.QTimer(self)
         self._close_timer.setSingleShot(True)
@@ -97,13 +104,15 @@ class MDrawer(QtWidgets.QWidget):
         self._opacity_ani.start()
 
     def _fade_int(self):
+        self._pos_ani.setDirection(QtCore.QAbstractAnimation.Forward)
         self._pos_ani.start()
+        self._opacity_ani.setDirection(QtCore.QAbstractAnimation.Forward)
         self._opacity_ani.start()
 
     def _set_proper_position(self):
         parent = self.parent()
         parent_geo = parent.geometry()
-        if self._position == MDrawer.LeftPos:
+        if self._position in [MDrawer.LeftPos, MDrawer.ToLeftPos]:
             pos = (
                 parent_geo.topLeft()
                 if parent.parent() is None
@@ -112,9 +121,18 @@ class MDrawer(QtWidgets.QWidget):
             target_x = pos.x()
             target_y = pos.y()
             self.setFixedHeight(parent_geo.height())
-            self._pos_ani.setStartValue(QtCore.QPoint(target_x - self.width(), target_y))
-            self._pos_ani.setEndValue(QtCore.QPoint(target_x, target_y))
-        if self._position == MDrawer.RightPos:
+
+            start_x = target_x - self.width()
+            end_x = target_x
+            if self._position == MDrawer.ToLeftPos:
+                start_x = target_x - self.width()*0.5
+                end_x = target_x - self.width()
+
+            self._pos_ani.setStartValue(
+                QtCore.QPoint(start_x, target_y)
+            )
+            self._pos_ani.setEndValue(QtCore.QPoint(end_x, target_y))
+        if self._position in [MDrawer.RightPos, MDrawer.ToRightPos]:
             pos = (
                 parent_geo.topRight()
                 if parent.parent() is None
@@ -123,9 +141,17 @@ class MDrawer(QtWidgets.QWidget):
             self.setFixedHeight(parent_geo.height())
             target_x = pos.x() - self.width()
             target_y = pos.y()
-            self._pos_ani.setStartValue(QtCore.QPoint(target_x + self.width(), target_y))
-            self._pos_ani.setEndValue(QtCore.QPoint(target_x, target_y))
-        if self._position == MDrawer.TopPos:
+
+            start_x = target_x + self.width()
+            end_x = target_x
+            if self._position == MDrawer.ToRightPos:
+                start_x = target_x + self.width()*0.5
+                end_x = target_x + self.width()
+            self._pos_ani.setStartValue(
+                QtCore.QPoint(start_x, target_y)
+            )
+            self._pos_ani.setEndValue(QtCore.QPoint(end_x, target_y))
+        if self._position in [MDrawer.TopPos, MDrawer.ToTopPos]:
             pos = (
                 parent_geo.topLeft()
                 if parent.parent() is None
@@ -134,9 +160,17 @@ class MDrawer(QtWidgets.QWidget):
             self.setFixedWidth(parent_geo.width())
             target_x = pos.x()
             target_y = pos.y()
-            self._pos_ani.setStartValue(QtCore.QPoint(target_x, target_y - self.height()))
-            self._pos_ani.setEndValue(QtCore.QPoint(target_x, target_y))
-        if self._position == MDrawer.BottomPos:
+
+            start_y = target_y - self.height()
+            end_y = target_y
+            if self._position == MDrawer.ToTopPos:
+                start_y = target_y - self.height() * 0.5
+                end_y = target_y - self.height()
+            self._pos_ani.setStartValue(
+                QtCore.QPoint(target_x, start_y)
+            )
+            self._pos_ani.setEndValue(QtCore.QPoint(target_x, end_y))
+        if self._position in [MDrawer.BottomPos, MDrawer.ToBottomPos]:
             pos = (
                 parent_geo.bottomLeft()
                 if parent.parent() is None
@@ -145,8 +179,16 @@ class MDrawer(QtWidgets.QWidget):
             self.setFixedWidth(parent_geo.width())
             target_x = pos.x()
             target_y = pos.y() - self.height()
-            self._pos_ani.setStartValue(QtCore.QPoint(target_x, target_y + self.height()))
-            self._pos_ani.setEndValue(QtCore.QPoint(target_x, target_y))
+
+            start_y = target_y + self.height()
+            end_y = target_y
+            if self._position == MDrawer.ToBottomPos:
+                start_y = target_y - self.height()*0.5
+                end_y = target_y + self.height()*1.5
+            self._pos_ani.setStartValue(
+                QtCore.QPoint(target_x, start_y)
+            )
+            self._pos_ani.setEndValue(QtCore.QPoint(target_x, end_y))
 
     def set_dayu_position(self, value):
         """

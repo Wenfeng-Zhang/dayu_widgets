@@ -2,9 +2,9 @@
 import functools
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtGui
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtGui
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.menu import MMenu
@@ -14,12 +14,16 @@ import dayu_widgets.utils as utils
 class MHeaderView(QtWidgets.QHeaderView):
     def __init__(self, orientation, parent=None, show_sort_indicator=True):
         super(MHeaderView, self).__init__(orientation, parent)
-        self.setMovable(True)
+        # self.setMovable(True)
+        self.setMovable(orientation == QtCore.Qt.Horizontal)
         self.setClickable(True)
         self.setSortIndicatorShown(show_sort_indicator)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._slot_context_menu)
-        self.setDefaultAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+
+        header_alignment = (QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter) if orientation == QtCore.Qt.Horizontal else (
+                    QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        self.setDefaultAlignment(header_alignment)
         self.setProperty(
             "orientation",
             "horizontal" if orientation == QtCore.Qt.Horizontal else "vertical",
@@ -37,42 +41,69 @@ class MHeaderView(QtWidgets.QHeaderView):
     @QtCore.Slot(QtCore.QPoint)
     def _slot_context_menu(self, point):
         context_menu = MMenu(parent=self)
-        logical_column = self.logicalIndexAt(point)
-        model = utils.real_model(self.model())
-        if logical_column >= 0 and model.header_list[logical_column].get("checkable", False):
-            action_select_all = context_menu.addAction(self.tr("Select All"))
-            action_select_none = context_menu.addAction(self.tr("Select None"))
-            action_select_invert = context_menu.addAction(self.tr("Select Invert"))
-            action_select_all.triggered.connect(
-                functools.partial(self._slot_set_select, logical_column, QtCore.Qt.Checked)
-            )
-            action_select_none.triggered.connect(
-                functools.partial(
-                    self._slot_set_select, logical_column, QtCore.Qt.Unchecked
-                )
-            )
-            action_select_invert.triggered.connect(
-                functools.partial(self._slot_set_select, logical_column, None)
-            )
-            context_menu.addSeparator()
-
-        fit_action = context_menu.addAction(self.tr("Fit Size"))
-        fit_action.triggered.connect(functools.partial(self._slot_set_resize_mode, True))
+        # Add Reset Sort action
+        action_reset = context_menu.addAction(self.tr("Reset Sort"))
+        action_reset.triggered.connect(self._slot_reset_sort)
         context_menu.addSeparator()
-        for column in range(self.count()):
-            header_text = model.headerData(
-                column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole
-            )
-            action = context_menu.addAction(header_text)
-            action.setCheckable(True)
-            action.setChecked(not self.isSectionHidden(column))
-            action.toggled.connect(functools.partial(self._slot_set_section_visible, column))
+
+        if self.orientation() == QtCore.Qt.Horizontal:
+            logical_column = self.logicalIndexAt(point)
+            model = utils.real_model(self.model())
+            if (
+                logical_column >= 0
+                and model is not None
+                and getattr(model, "header_list", None)
+                and logical_column < len(model.header_list)
+                and model.header_list[logical_column].get("checkable", False)
+            ):
+                action_select_all = context_menu.addAction(self.tr("Select All"))
+                action_select_none = context_menu.addAction(self.tr("Select None"))
+                action_select_invert = context_menu.addAction(self.tr("Select Invert"))
+                action_select_all.triggered.connect(
+                    functools.partial(self._slot_set_select, logical_column, QtCore.Qt.Checked)
+                )
+                action_select_none.triggered.connect(
+                    functools.partial(
+                        self._slot_set_select, logical_column, QtCore.Qt.Unchecked
+                    )
+                )
+                action_select_invert.triggered.connect(
+                    functools.partial(self._slot_set_select, logical_column, None)
+                )
+                context_menu.addSeparator()
+
+            fit_action = context_menu.addAction(self.tr("Fit Size"))
+            fit_action.triggered.connect(functools.partial(self._slot_set_resize_mode, True))
+            context_menu.addSeparator()
+            if model is not None:
+                for column in range(self.count()):
+                    header_text = model.headerData(
+                        column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole
+                    )
+                    action = context_menu.addAction(header_text)
+                    action.setCheckable(True)
+                    action.setChecked(not self.isSectionHidden(column))
+                    action.toggled.connect(functools.partial(self._slot_set_section_visible, column))
         context_menu.exec_(QtGui.QCursor.pos() + QtCore.QPoint(10, 10))
+
+    @QtCore.Slot()
+    def _slot_reset_sort(self):
+        model = self.model()
+        if model is not None and hasattr(model, "sort"):
+            model.sort(-1)
+        # 清除排序指示器，避免数据已恢复原序但箭头仍指向旧列
+        self.setSortIndicator(-1, QtCore.Qt.AscendingOrder)
 
     @QtCore.Slot(int, int)
     def _slot_set_select(self, column, state):
         current_model = self.model()
         source_model = utils.real_model(current_model)
+        if (
+            source_model is None
+            or not getattr(source_model, "header_list", None)
+            or column >= len(source_model.header_list)
+        ):
+            return
         source_model.beginResetModel()
         attr = "{}_checked".format(source_model.header_list[column].get("key"))
         for row in range(current_model.rowCount()):
@@ -80,15 +111,20 @@ class MHeaderView(QtWidgets.QHeaderView):
             data_obj = real_index.internalPointer()
             if state is None:
                 old_state = utils.get_obj_value(data_obj, attr)
+                # 数据约定为 Python bool（True/False）时需兼容：
+                # True == Qt.Checked(2) 不成立，直接比较会漏反转
+                is_checked = old_state in (QtCore.Qt.Checked, True)
                 utils.set_obj_value(
                     data_obj,
                     attr,
-                    QtCore.Qt.Unchecked if old_state == QtCore.Qt.Checked else QtCore.Qt.Checked,
+                    QtCore.Qt.Unchecked if is_checked else QtCore.Qt.Checked,
                 )
             else:
                 utils.set_obj_value(data_obj, attr, state)
         source_model.endResetModel()
-        source_model.dataChanged.emit(None, None)
+        # beginResetModel/endResetModel already notifies views, emit dataChanged
+        # with empty indices as best-effort supplementary update for edge cases
+        source_model.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
 
     @QtCore.Slot(QtCore.QModelIndex, int)
     def _slot_set_section_visible(self, index, flag):
@@ -121,6 +157,6 @@ class MHeaderView(QtWidgets.QHeaderView):
 
     def setResizeMode(self, mode):
         try:
-            QtWidgets.QHeaderView.setResizeMode(self, mode)
-        except AttributeError:
             QtWidgets.QHeaderView.setSectionResizeMode(self, mode)
+        except AttributeError:
+            QtWidgets.QHeaderView.setResizeMode(self, mode)

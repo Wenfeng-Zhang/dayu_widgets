@@ -1,15 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-###################################################################
-# Author: Mu yanru
-# Date  : 2019.2
-# Email : muyanru345@163.com
-###################################################################
-
-# Import future modules
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 # Import built-in modules
 import functools
@@ -52,7 +42,6 @@ class MSequenceFile(QtWidgets.QWidget, MFieldMixin):
 
         self._info_label = MLabel().secondary()
         self._error_label = MLabel().secondary()
-        self._error_label.setProperty("error", True)
         self._error_label.setMinimumWidth(100)
         self._error_label.set_elide_mode(QtCore.Qt.ElideMiddle)
 
@@ -112,3 +101,11 @@ class MSequenceFile(QtWidgets.QWidget, MFieldMixin):
             self._error_label.setToolTip(error_info)
         self._info_label.setVisible(self.property("sequence"))
         self._error_label.setVisible(self.property("sequence"))
+
+    @property
+    def file_label(self):
+        return self._file_label
+
+    @property
+    def sequence_check_box(self):
+        return self._is_sequence_check_box

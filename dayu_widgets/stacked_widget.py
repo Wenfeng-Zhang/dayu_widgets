@@ -1,7 +1,7 @@
 """MStackedWidget"""
 
 # Import third-party modules
-from qtpy import QtWidgets
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.mixin import stacked_animation_mixin
@@ -15,4 +15,7 @@ class MStackedWidget(QtWidgets.QStackedWidget):
         super(MStackedWidget, self).__init__(parent)
 
     def disable_animation(self):
-        self.currentChanged.disconnect(self._play_anim)
+        try:
+            self.currentChanged.disconnect(self._play_anim)
+        except (RuntimeError, TypeError):
+            pass

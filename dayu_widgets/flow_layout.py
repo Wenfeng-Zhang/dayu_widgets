@@ -1,8 +1,8 @@
 """MFlowLayout"""
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 
 class MFlowLayout(QtWidgets.QLayout):
@@ -15,7 +15,10 @@ class MFlowLayout(QtWidgets.QLayout):
         super(MFlowLayout, self).__init__(parent)
 
         if parent is not None:
-            self.setMargin(margin)
+            if hasattr(self, 'setContentsMargins'):
+                self.setContentsMargins(margin, margin, margin, margin)
+            else:
+                self.setMargin(margin)
 
         self.setSpacing(spacing)
 

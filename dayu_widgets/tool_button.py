@@ -1,8 +1,8 @@
 """MToolButton"""
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -17,6 +17,7 @@ class MToolButton(QtWidgets.QToolButton):
     def __init__(self, parent=None):
         super(MToolButton, self).__init__(parent=parent)
         self._dayu_svg = None
+        self._dayu_double_clicked_callback = None
         self.setAutoExclusive(False)
         self.setAutoRaise(True)
 
@@ -25,6 +26,14 @@ class MToolButton(QtWidgets.QToolButton):
         self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         self._dayu_size = dayu_theme.default_size
+
+    def mouseDoubleClickEvent(self, event):
+        """双击回调：对实例 monkey-patch 该方法在 PySide2/6 下不会进入虚表，
+        必须定义在类上才会被 Qt 调用。"""
+        callback = getattr(self, "_dayu_double_clicked_callback", None)
+        if callable(callback):
+            callback()
+        super(MToolButton, self).mouseDoubleClickEvent(event)
 
     @QtCore.Slot(bool)
     def _polish_icon(self, checked=None):

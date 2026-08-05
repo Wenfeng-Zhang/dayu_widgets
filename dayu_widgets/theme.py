@@ -264,7 +264,10 @@ class MTheme(object):
         try:
             return object.__getattribute__(self, item)
         except AttributeError:
-            return get_theme_size().get(item, 0)
+            size_map = get_theme_size()
+            if item in size_map:
+                return size_map[item]
+            raise
 
     def _dark(self):
         self.title_color = "#ffffff"
@@ -300,7 +303,10 @@ class MTheme(object):
         self.mask_color = utils.fade_color(self.background_color, "90%")
         self.toast_color = "#333333"
 
-    def apply(self, widget):
+    def apply(self, widget, qss_file=""):
+        if qss_file:
+            with open(qss_file, "r") as f:
+                self.default_qss = QssTemplate(f.read())
         size_dict = get_theme_size()
         size_dict.update(vars(self))
         widget.setStyleSheet(self.default_qss.substitute(size_dict))

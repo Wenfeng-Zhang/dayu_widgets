@@ -2,8 +2,8 @@
 import functools
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.label import MLabel
@@ -15,6 +15,7 @@ from dayu_widgets.tool_button import MToolButton
 @property_mixin
 class MSectionItem(QtWidgets.QWidget):
     sig_context_menu = QtCore.Signal(object)
+    sig_left_clicked = QtCore.Signal(object)
 
     def __init__(self, title="", expand=False, widget=None, closable=False, parent=None):
         super(MSectionItem, self).__init__(parent)
@@ -74,7 +75,6 @@ class MSectionItem(QtWidgets.QWidget):
         self.setProperty("closable", value)
 
     def _set_closable(self, value):
-        self.content_widget.setVisible(value)
         self._close_button.setVisible(value)
 
     def set_expand(self, value):
@@ -95,10 +95,13 @@ class MSectionItem(QtWidgets.QWidget):
         if widget in [self.header_widget, self.title_label]:
             if event.type() == QtCore.QEvent.MouseButtonRelease:
                 self.set_expand(not self.property("expand"))
-        return super(QtWidgets.QWidget, self).eventFilter(widget, event)
+                self.sig_left_clicked.emit(widget)
+        return super(MSectionItem, self).eventFilter(widget, event)
 
 
 class MCollapse(QtWidgets.QWidget):
+    sig_section_left_clicked = QtCore.Signal(object)
+
     def __init__(self, parent=None):
         super(MCollapse, self).__init__(parent)
         self._section_list = []
@@ -116,22 +119,33 @@ class MCollapse(QtWidgets.QWidget):
             closable=section_data.get("closable", False),
         )
         self._main_layout.insertWidget(self._main_layout.count(), section_widget)
+        self._section_list.append(section_widget)
         return section_widget
 
     def add_section_list(self, section_list):
         for section_data in section_list:
             section_widget = self.add_section(section_data)
-            callback = functools.partial(self.remove_section, section_widget)
-            section_widget._close_button.clicked.connect(callback)
-            self._section_list.append(section_widget)
+            section_widget._close_button.clicked.connect(functools.partial(self.remove_section, section_widget))
+            section_widget.sig_left_clicked.connect(self.sig_section_left_clicked.emit)
+
+    def add_section_widget(self, widget):
+        self._main_layout.insertWidget(self._main_layout.count(), widget)
 
     def remove_section(self, widget):
         self._section_list.remove(widget)
+        widget.setParent(None)
 
     def sections(self):
         return self._section_list
 
     def clear(self):
         for widget in self._section_list:
+            widget.setParent(None)
             self._main_layout.removeWidget(widget)
             del widget
+        self._section_list = []
+        # 去掉QVBoxLayout这种控件里因为addStretch而添加的Stretch空格,Stretch空格是QSpacerItem类型
+        for i in range(self._main_layout.count()):
+            spacer_item = self._main_layout.itemAt(i)
+            if isinstance(spacer_item, QtWidgets.QSpacerItem):
+                self._main_layout.removeItem(spacer_item)
