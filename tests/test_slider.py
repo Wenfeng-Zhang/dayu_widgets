@@ -2,7 +2,7 @@
 
 # Import third-party modules
 import pytest
-from qtpy import QtCore
+from Qt import QtCore
 
 # Import local modules
 from dayu_widgets.slider import MSlider

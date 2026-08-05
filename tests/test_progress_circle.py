@@ -1,6 +1,6 @@
 # Import third-party modules
 import pytest
-from qtpy import QtWidgets
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.progress_circle import MProgressCircle

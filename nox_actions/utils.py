@@ -30,10 +30,10 @@ def get_qt_dependencies(qt_binding):
         if sys.version_info >= (3, 11):
             print("Skipping PySide2 tests on Python 3.11+")
             return []  # 返回空列表，让调用者处理跳过测试
-        # 不再返回PySide2和qtpy，因为它们会通过extras安装
+        # 不再返回PySide2，因为它们会通过extras安装
         return base_deps
     else:  # pyside6
-        # 不再返回PySide6和qtpy，因为它们会通过extras安装
+        # 不再返回PySide6，因为它们会通过extras安装
         return base_deps
 
 

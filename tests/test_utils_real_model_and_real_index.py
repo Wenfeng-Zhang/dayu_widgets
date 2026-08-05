@@ -3,8 +3,8 @@ Test helper functions about Qt MVC: real_model, real_index
 """
 
 # Import third-party modules
-from qtpy import QtCore
-from qtpy import QtGui
+from Qt import QtCore
+from Qt import QtGui
 
 # Import local modules
 from dayu_widgets import utils

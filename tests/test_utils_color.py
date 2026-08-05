@@ -4,7 +4,7 @@ Test Color helper functions.
 
 # Import third-party modules
 import pytest
-from qtpy import QtGui
+from Qt import QtGui
 
 # Import local modules
 from dayu_widgets import utils

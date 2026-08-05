@@ -1,7 +1,7 @@
 """Test MStackedWidget class"""
 
 # Import third-party modules
-from qtpy import QtWidgets
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.stacked_widget import MStackedWidget

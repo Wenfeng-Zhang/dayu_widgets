@@ -4,8 +4,8 @@ Test MLoading and MLoadingWrapper class
 
 # Import third-party modules
 import pytest
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import dayu_theme

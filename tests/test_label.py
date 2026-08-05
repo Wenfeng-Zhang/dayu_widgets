@@ -4,8 +4,8 @@ Test class MLabel.
 
 # Import third-party modules
 import pytest
-from qtpy import QtCore
-from qtpy import QtWidgets
+from Qt import QtCore
+from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.label import MLabel

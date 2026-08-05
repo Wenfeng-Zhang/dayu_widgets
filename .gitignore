@@ -107,3 +107,4 @@ venv.bak/
 
 scripts/deploy.json
 .vscode
+.reasonix/

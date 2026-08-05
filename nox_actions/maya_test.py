@@ -40,7 +40,7 @@ def maya_test(session: nox.Session) -> None:
 
     # Install dependencies
     print("Installing dependencies...")
-    session.install("pytest>=7.0.0", "pytest-cov>=4.1.0", "qtpy>=2.3.1")
+    session.install("pytest>=7.0.0", "pytest-cov>=4.1.0", "Qt.py>=1.3.8")
 
     # Install the package with PySide2 (Maya uses PySide2)
     print("Installing the package...")

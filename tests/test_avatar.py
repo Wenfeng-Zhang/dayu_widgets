@@ -4,8 +4,7 @@ Test MAvatar class
 
 # Import third-party modules
 import pytest
-from qtpy import API
-from qtpy import QtGui
+from Qt import QtGui
 
 # Import local modules
 from dayu_widgets import dayu_theme
@@ -15,7 +14,8 @@ from dayu_widgets.qt import MPixmap
 
 def get_qt_binding():
     """Return current Qt binding being used"""
-    return API
+    import Qt
+    return Qt.__binding__
 
 
 @pytest.mark.parametrize("image", ("check.svg", None))

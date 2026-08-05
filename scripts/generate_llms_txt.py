@@ -8,11 +8,6 @@ and formats them according to the Context7 llms.txt format.
 Note: This script follows PEP 8 style guidelines.
 """
 
-# Import future modules
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 # Import built-in modules
 import os
 import re
