@@ -330,6 +330,14 @@ class MTableModel(QtCore.QAbstractItemModel):
 
         header_config = self.header_list[column]
 
+        # 组头行（group_builder 构建的 _is_group_row 节点）不参与编辑/复选，
+        # 否则 editable/selectable 列会在组头行触发 editor 弹出控件。
+        data_obj = index.internalPointer()
+        is_group_row = isinstance(data_obj, dict) and data_obj.get("_is_group_row") is True
+
+        if is_group_row:
+            return result & ~QtCore.Qt.ItemIsEditable
+
         if header_config.get("checkable", False):
             result |= QtCore.Qt.ItemIsUserCheckable
             data_obj = index.internalPointer()
@@ -619,7 +627,13 @@ class MTableModel(QtCore.QAbstractItemModel):
         # 直接访问 internalPointer，假设它是 dict
         data_obj = index.internalPointer()
 
-        # 1. 快速路径：最常用的 DisplayRole 和 EditRole
+        # 组头行（group_builder 的 _is_group_row 节点）不参与数据 role 渲染：
+        # 组头整行由组头 delegate 自绘，任何 BackgroundRole/FontRole/DecorationRole/
+        # ForegroundRole 的 formatter 都会收到 None 值，可能崩溃或给组头染上数据色。
+        if isinstance(data_obj, dict) and data_obj.get("_is_group_row") is True:
+            return None
+
+        # 1. 快速路径：DisplayRole / EditRole
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             attr = self._col_keys[column]
             # 使用 dict.get 直接获取值，比 get_obj_value 少一层函数调用
@@ -630,7 +644,12 @@ class MTableModel(QtCore.QAbstractItemModel):
             else:
                 value = getattr(data_obj, attr, None)
 
-            # 尝试直接从 header 配置获取 display formatter
+            # EditRole 返回原始值：编辑器应拿到未格式化的数据（如 12 而非 "12 岁"），
+            # 否则 display formatter 会在每次编辑往返中重复叠加（"12 岁" -> "12 岁 岁"）。
+            if role == QtCore.Qt.EditRole:
+                return value
+
+            # DisplayRole 应用 display formatter
             formatter = self._col_displays[column]
             if formatter:
                 return apply_formatter(formatter, value, data_obj)

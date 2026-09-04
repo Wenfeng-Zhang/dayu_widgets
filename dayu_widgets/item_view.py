@@ -101,6 +101,13 @@ class MOptionDelegate(QtWidgets.QStyledItemDelegate):
 
     def paint(self, painter, option, index):
         painter.save()
+        # 组头行（group_builder 的 _is_group_row 节点）整行已由组头 delegate 在第 0 列
+        # 自绘完成，其它列（含 selectable 列）不应再绘制任何内容，
+        # 否则会覆盖组头背景并显示下层数据的人像图标/配色。
+        data_obj = utils.real_index(index).internalPointer()
+        if isinstance(data_obj, dict) and data_obj.get("_is_group_row") is True:
+            painter.restore()
+            return
         icon_color = dayu_theme.icon_color
         if option.state & QtWidgets.QStyle.State_MouseOver:
             painter.fillRect(option.rect, QtGui.QColor(dayu_theme.primary_5))

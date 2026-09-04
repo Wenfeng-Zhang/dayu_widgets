@@ -46,7 +46,7 @@ _GROUP_ACCENT = ["#4a90d9", "#57a86b", "#d0a13a", "#b06bd0", "#d06b6b"]  # 各�
 _GROUP_FG = QtGui.QColor("#ffffff")
 _ARROW_COLOR = QtGui.QColor("#f0f0f0")
 _GROUP_SEP = QtGui.QColor("#2a2a2a")       # 组头底部分隔线
-_GROUP_INDENT_STEP = 22              # 每层缩进
+_GROUP_INDENT_STEP = 10             # 每层缩进（多级分组时每往下一层的左缩进量）
 _GROUP_BAR_W = 3                     # 彩色左边条宽度
 # 组头行高：约为表头/数据行(=dayu_theme.default_size)的 85%，比表头略矮但不局促
 _GROUP_ROW_H = max(int(dayu_theme.default_size * 0.85), 28)
@@ -109,68 +109,68 @@ class _GroupRowDelegate(QtWidgets.QStyledItemDelegate):
             super(_GroupRowDelegate, self).paint(painter, option, index)
             return
 
+        # 组头行的「整行」只由第 0 列绘制（背景+左条+箭头+组名，rect 扩展到整行宽度），
+        # 其它列（含 selectable/editable 列的 delegate）必须直接 return、什么都不画，
+        # 否则会覆盖整行背景并重新画出下层数据的人像图标/配色，把分组栏切成一块块。
+        if index.column() != 0:
+            return
+
         painter.save()
         level = data_obj.get(GROUP_LEVEL_KEY, 0)
-        rect = option.rect
-        # 组头行不依赖 setFirstColumnSpanned（该 API 在 PySide6 下与自绘 delegate 组合会段错误），
-        # 这里直接把绘制区域扩展到整行宽度，实现「组名跨满整行」的视觉效果。
+        rect = QtCore.QRect(option.rect)
+        # 扩展到整行宽度（不依赖 setFirstColumnSpanned：该 API 在 PySide6 下会段错误）
         viewport_width = self._tree_view.viewport().width()
-        if index.column() == 0 and rect.right() < viewport_width:
-            rect = QtCore.QRect(rect)
+        if rect.right() < viewport_width:
             rect.setRight(viewport_width)
         bar_x = rect.left() + level * _GROUP_INDENT_STEP
 
-        # ① 整行先铺暗色沟槽 → ② 从缩进处起铺该层背景（逐层变亮）→ 形成"子组内缩"观感
+        # ① 整行先铺暗色沟槽 → ② 从缩进处起铺该层背景（逐层变亮）
         painter.fillRect(rect, _GROUP_GUTTER)
         area = QtCore.QRect(rect)
         area.setLeft(bar_x)
         painter.fillRect(area, _level_color(_GROUP_BG, level))
-        # ③ 缩进处画一条彩色左边条，颜色随层级变化，一眼区分父/子/孙
+        # ③ 缩进处画一条彩色左边条，颜色随层级变化
         painter.fillRect(QtCore.QRect(bar_x, rect.top(), _GROUP_BAR_W, rect.height()),
                          _level_color(_GROUP_ACCENT, level))
 
-        # 底部分隔线：折叠时组头堆叠在一起，用一条深色线区分
+        # 底部分隔线
         painter.setPen(_GROUP_SEP)
         painter.drawLine(rect.left(), rect.bottom(), rect.right(), rect.bottom())
 
-        # 组头行由 delegate 在第 0 列绘制并扩展至整行宽度（不再依赖 setFirstColumnSpanned）
-        if index.column() == 0:
-            expanded = self._tree_view.isExpanded(index)
-            cx = bar_x + _GROUP_BAR_W + 12    # 箭头在彩色边条之后
-            cy = rect.center().y()
-            s = 6                             # 箭头半尺寸（放大更醒目）
-            # 注意：不要在 item delegate 里 setRenderHint(Antialiasing)，PySide6 下会段错误
-            painter.setBrush(_ARROW_COLOR)
-            painter.setPen(QtCore.Qt.NoPen)
-            if expanded:
-                # ▼ 向下（用 QPainterPath 画三角，跨 Qt5/Qt6 兼容，QPolygon 在 PySide6 下易段错误）
-                path = QtGui.QPainterPath()
-                path.moveTo(cx - s, cy - s + 2)
-                path.lineTo(cx + s, cy - s + 2)
-                path.lineTo(cx, cy + s)
-                path.closeSubpath()
-            else:
-                # ▶ 向右
-                path = QtGui.QPainterPath()
-                path.moveTo(cx - s + 2, cy - s)
-                path.lineTo(cx - s + 2, cy + s)
-                path.lineTo(cx + s + 2, cy)
-                path.closeSubpath()
-            painter.drawPath(path)
+        # 箭头 + 组名
+        expanded = self._tree_view.isExpanded(index)
+        cx = bar_x + _GROUP_BAR_W + 12
+        cy = rect.center().y()
+        s = 6
+        # 注意：不要在 item delegate 里 setRenderHint(Antialiasing)，PySide6 下会段错误
+        painter.setBrush(_ARROW_COLOR)
+        painter.setPen(QtCore.Qt.NoPen)
+        if expanded:
+            path = QtGui.QPainterPath()
+            path.moveTo(cx - s, cy - s + 2)
+            path.lineTo(cx + s, cy - s + 2)
+            path.lineTo(cx, cy + s)
+            path.closeSubpath()
+        else:
+            path = QtGui.QPainterPath()
+            path.moveTo(cx - s + 2, cy - s)
+            path.lineTo(cx - s + 2, cy + s)
+            path.lineTo(cx + s + 2, cy)
+            path.closeSubpath()
+        painter.drawPath(path)
 
-            # 组名文字：纯组名 + 动态计数（该组当前可见叶子数，随搜索实时更新）；字号比默认小 1 号
-            base = self._get_group_label(data_obj) or ""
-            text = u"{}  ({})".format(base, self._visible_leaf_count(index))
-            painter.setPen(_GROUP_FG)
-            font = QtGui.QFont(option.font)
-            font.setBold(True)
-            ps = font.pointSize()
-            if ps > 0:
-                font.setPointSize(max(ps - 1, 1))
-            painter.setFont(font)
-            text_rect = QtCore.QRect(rect)
-            text_rect.setLeft(cx + s + 10)
-            painter.drawText(text_rect, QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft, text)
+        base = self._get_group_label(data_obj) or ""
+        text = u"{}  ({})".format(base, self._visible_leaf_count(index))
+        painter.setPen(_GROUP_FG)
+        font = QtGui.QFont(option.font)
+        font.setBold(True)
+        ps = font.pointSize()
+        if ps > 0:
+            font.setPointSize(max(ps - 1, 1))
+        painter.setFont(font)
+        text_rect = QtCore.QRect(rect)
+        text_rect.setLeft(cx + s + 10)
+        painter.drawText(text_rect, QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft, text)
         painter.restore()
 
 
@@ -213,6 +213,9 @@ class MGroupedGridView(QtWidgets.QWidget):
         # 表头各列之间加竖直分界线
         self.tree_view.header().setStyleSheet(
             "QHeaderView::section { border-right: 1px solid #2a2a2a; }")
+        # 最后一列撑满剩余宽度，避免列宽之和小于视口时右侧出现大片空白，
+        # 导致分组行在视觉上被「切断」成几块。
+        self.tree_view.header().setStretchLastSection(True)
         self.tree_view.setExpandsOnDoubleClick(False)
         self.tree_view.doubleClicked.connect(self.slot_double_clicked)
         self.tree_view.pressed.connect(self.slot_left_clicked)
@@ -355,21 +358,8 @@ class MGroupedGridView(QtWidgets.QWidget):
         if self._group_fields:
             self.tree_view.expandAll()
             self._expanded = True
-            self._apply_span()
         self._update_page_info(
             len(self._all_data), len(self._grouped_roots))
-
-    def _apply_span(self, parent=QtCore.QModelIndex()):
-        """组头行跨整行视觉由 delegate 绘制实现（不再调用 setFirstColumnSpanned）。
-
-        setFirstColumnSpanned 在 PySide6 下与 setRootIsDecorated(False) + 自绘
-        delegate 组合会触发段错误，故此处保留遍历但不设置 span。
-        """
-        model = self.sort_filter_model
-        for r in range(model.rowCount(parent)):
-            idx = model.index(r, 0, parent)
-            if model.hasChildren(idx):
-                self._apply_span(idx)
 
     def _update_page_info(self, total, group_count):
         if self._group_fields:
@@ -381,9 +371,8 @@ class MGroupedGridView(QtWidgets.QWidget):
     def _on_search(self, pattern):
         self.sort_filter_model.set_search_pattern(pattern)
         self.big_view.set_search_pattern(pattern)
-        # 过滤后重设组头跨列并强制整块重绘，避免残留旧绘制（条纹）
-        if self._group_fields:
-            self._apply_span()
+        # 过滤后强制整块重绘，避免残留旧绘制（条纹）。组头跨整行已由 delegate 自绘，
+        # 无需再设置 span。
         self.tree_view.viewport().update()
 
     def _show_group_menu(self):
