@@ -20,6 +20,17 @@
 - Migrate examples from `qtpy` to `Qt` module imports
 - Remove `__future__` imports across all source files
 
+### Fix (2025-08-29)
+
+- Fix `QRegularExpression` AttributeError on PySide2 by reverting regex to stdlib `re` (Qt5/Qt6 agnostic)
+- Upgrade `Qt.py` from `^1.3.8` to `>=2.0.5` in `pyproject.toml`/`setup.cfg`/`poetry.lock`
+- Fix `application()` not entering event loop when reusing an existing QApplication (startup flash-crash)
+- Fix PySide6 segfault in `grouped_grid_view` (delegate `setRenderHint(Antialiasing)` + `QPolygon` → `QPainterPath`)
+- Add `utils.safe_disconnect` to silence PySide6 `RuntimeWarning` on `disconnect`
+- Fix `MAlert` parent-less window flash in `table_view_example`
+- Constrain `PySide2 <3.11`, `PySide6 >=6.4.2,<6.7`, add `dayu_path` dependency
+- Add `MGroupedGridView` / `GroupedBigView` / `group_builder` grouped table & big view widgets
+
 ## v1.1.1 (2025-07-28)
 
 ### Fix

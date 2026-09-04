@@ -49,6 +49,22 @@
 - `examples/tree_view_multi_level_example.py` — 多层树懒加载
 - `examples/tree_view_50000_example.py` — 5 万行压力测试
 - `examples/tree_view_paging_example.py` — 分页 + 页内懒加载 + 过滤重建分页
+- `examples/grouped_grid_view_example.py` — 分组表格 / 分组大图示例
+
+### 新增控件：分组表格 / 分组大图
+- `MGroupedGridView`：按一个或多个字段逐层分组的表格 + 大图组合控件（分组字段可多选、搜索、展开/折叠）
+- `GroupedBigView`：按组分块的缩略图流（只显示有图行，组头计数随搜索实时更新）
+- `group_builder`：纯数据变换工具，把扁平数据组织成 `MTableModel` 认识的树形结构
+
+### 工程标准化与本轮修复
+- **Qt.py 升级到 2.0.5**（`pyproject.toml`/`setup.cfg`/`poetry.lock` 同步），修复旧约束 `^1.3.8` 锁定 1.4.8 导致的 `QRegularExpression` 属性缺失
+- **正则过滤还原为标准库 `re`**：跨 Qt5/Qt6 零耦合；真实 GUI 场景实测 `re` 比 Qt 正则快约 1.15x（裸循环快 4-6x，端到端差距被 model.data()/信号稀释）
+- 补 `setup.py`、`.editorconfig`、`.gitattributes`（统一 LF、跨 IDE 缩进），`pip install -e .` 可用
+- 修复 `application()` 复用已有 app 时不进事件循环导致的启动闪退（含防重入）
+- 修复 `grouped_grid_view` 在 PySide6 下的段错误（delegate 里 `setRenderHint(Antialiasing)` + `QPolygon` 改为 `QPainterPath`）
+- 修复 PySide6 下 `disconnect` 的 `RuntimeWarning`（新增 `utils.safe_disconnect`）
+- 依赖约束修正：`PySide2 <3.11`、`PySide6 >=6.4.2,<6.7`、补 `dayu_path`
+- 清理 52 个 example 的 `from __future__` 残留、修正 version 对齐 1.2.0
 
 <!-- ================= 以上为本 fork 新增内容 ================= -->
 
@@ -198,10 +214,10 @@ pip install dayu_widgets
 
 ## 运行示例程序
 
-安装后，可以通过以下命令直接运行示例程序。注意，运行示例程序需要 Qt 环境（如 PySide2 或 PyQt5）：
+安装后，可以通过以下命令直接运行示例程序。注意，运行示例程序需要 Qt 环境（PySide2 或 PySide6）：
 
 ```shell
-# 使用 Python 模块方式运行（需要先安装 PySide2 或 PyQt5）
+# 使用 Python 模块方式运行（需要先安装 PySide2 或 PySide6）
 python -m dayu_widgets
 
 # 使用 uvx 命令行工具运行（推荐方式，自动处理依赖）
