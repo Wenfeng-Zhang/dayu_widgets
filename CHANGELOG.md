@@ -1,3 +1,14 @@
+## v1.2.1 (2025-09-05)
+
+### Fix
+
+- 修复 grouped grid view 组头行渲染错误：组头行现在只由第 0 列自绘整行，其它列不再叠加下层数据的人像图标/颜色/编辑控件
+- 修复 display formatter 在 EditRole 被重复应用导致编辑往返叠加单位（"12 岁" → "12 岁 岁"）：EditRole 返回原始值
+- 修复组头行触发 editable/selectable 列编辑器和数据 role formatter：组件 data() 对组头行短路、flags() 去掉组头 ItemIsEditable
+- 修复 examples 中 4 个文件（_mock_data.py、delegate_button_example.py、delegate_button_example2.py、tree_view_multi_level_example.py）icon formatter 对 None 值的崩溃
+- 删除 main.qss 中 128 行冗余选择器（wizard/login/MColumnView 等未使用样式）
+- 分组缩进 22→10、最后一列撑满、删除无用 `_apply_span` 空遍历
+
 ## v1.2.0 (2025-07-31)
 
 ### BREAKING CHANGE

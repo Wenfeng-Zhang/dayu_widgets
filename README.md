@@ -21,7 +21,7 @@
 
 ## 📌 本 Fork 更新说明
 
-> 本仓库基于上游 [dayu_widgets](https://github.com/phenom-films/dayu_widgets) fork，版本升至 **1.2.0**（Qt 抽象层由 `qtpy` 切换为 `Qt.py`，不再兼容 Python 2）。以下为相对上游 v1.1.1 的主要更新，完整变更见 [CHANGELOG.md](CHANGELOG.md)。
+> 本仓库基于上游 [dayu_widgets](https://github.com/phenom-films/dayu_widgets) fork，版本升至 **1.2.1**（Qt 抽象层由 `qtpy` 切换为 `Qt.py`，不再兼容 Python 2）。以下为相对上游 v1.1.1 的主要更新，完整变更见 [CHANGELOG.md](CHANGELOG.md)。
 
 ### 模型层（item_model.py）
 - `MTableModel` 支持生成器/迭代器数据源，`fetchMore` 逐块消费，可承载超大数据集
@@ -64,7 +64,7 @@
 - 修复 `grouped_grid_view` 在 PySide6 下的段错误（delegate 里 `setRenderHint(Antialiasing)` + `QPolygon` 改为 `QPainterPath`）
 - 修复 PySide6 下 `disconnect` 的 `RuntimeWarning`（新增 `utils.safe_disconnect`）
 - 依赖约束修正：`PySide2 <3.11`、`PySide6 >=6.4.2,<6.7`、补 `dayu_path`
-- 清理 52 个 example 的 `from __future__` 残留、修正 version 对齐 1.2.0
+- 清理 52 个 example 的 `from __future__` 残留、修正 version 对齐 1.2.1
 
 <!-- ================= 以上为本 fork 新增内容 ================= -->
 

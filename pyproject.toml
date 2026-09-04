@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dayu_widgets"
-version = "1.2.0"
+version = "1.2.1"
 description = "Components for PySide2/PySide6."
 homepage = "https://github.com/muyr/dayu_widgets3"
 repository = "https://github.com/muyr/dayu_widgets3"
