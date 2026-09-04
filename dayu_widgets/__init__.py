@@ -42,6 +42,8 @@ from dayu_widgets.combo_box import MComboBox
 from dayu_widgets.divider import MDivider
 from dayu_widgets.field_mixin import MFieldMixin
 from dayu_widgets.flow_layout import MFlowLayout
+from dayu_widgets.grouped_big_view import GroupedBigView
+from dayu_widgets.grouped_grid_view import MGroupedGridView
 from dayu_widgets.item_model import MSortFilterModel
 from dayu_widgets.item_model import MTableModel
 from dayu_widgets.item_view import MBigView
@@ -78,6 +80,7 @@ from dayu_widgets.tool_button import MToolButton
 
 
 __all__ = [
+    "GroupedBigView",
     "MAlert",
     "MAvatar",
     "MBadge",
@@ -107,6 +110,7 @@ __all__ = [
     "MListView",
     "MTableView",
     "MTreeView",
+    "MGroupedGridView",
     "MItemViewFullSet",
     "MItemViewSet",
     "MLabel",
