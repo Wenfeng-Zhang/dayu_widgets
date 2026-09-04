@@ -14,7 +14,6 @@ from dayu_widgets.utils import get_obj_value
 from dayu_widgets.utils import icon_formatter
 from dayu_widgets.utils import set_obj_value
 
-# QRegExp compatibility class removed as we standardized on QRegularExpression
 
 SETTING_MAP = {
     QtCore.Qt.BackgroundRole: {"config": "bg_color", "formatter": QtGui.QColor},
@@ -863,12 +862,7 @@ class MSortFilterModel(QtCore.QSortFilterProxyModel):
         ]
 
         for head in self.header_list:
-            reg_exp = head.get("reg")
-            if reg_exp is None:
-                # 统一使用 QRegularExpression
-                reg_exp = QtCore.QRegularExpression()
-                reg_exp.setPatternOptions(QtCore.QRegularExpression.CaseInsensitiveOption)
-                head["reg"] = reg_exp
+            head.setdefault("reg", None)
 
     def _matches_filter(self, source_row, source_parent):
         """检查单行是否匹配过滤条件（不递归）"""
@@ -912,9 +906,8 @@ class MSortFilterModel(QtCore.QSortFilterProxyModel):
         # 2. 列过滤优化
         for col, header_config in self._filter_columns:
             reg_exp = header_config.get("reg")
-            pattern = reg_exp.pattern()
 
-            if not pattern:  # 如果没有设置过滤模式，跳过
+            if reg_exp is None:  # 没有设置过滤模式，跳过
                 continue
 
             model_index = get_index(source_row, col, source_parent)
@@ -928,23 +921,18 @@ class MSortFilterModel(QtCore.QSortFilterProxyModel):
                 if values:
                     match_found = False
                     for v in values:
-                        match = reg_exp.match(v)
-                        # QRegularExpression exactMatch equivalent:
-                        # pattern matches from start (0) to end (len(v))
-                        if match.hasMatch() and match.capturedStart() == 0 and match.capturedLength() == len(v):
+                        if reg_exp.search(v):
                             match_found = True
                             break
                     if not match_found:
                         return False
                 else:
                     # 空字符串的情况
-                    match = reg_exp.match("")
-                    if not (match.hasMatch() and match.capturedStart() == 0 and match.capturedLength() == 0):
+                    if not reg_exp.search(""):
                         return False
             else:
                 value_str = str(value)
-                match = reg_exp.match(value_str)
-                if not (match.hasMatch() and match.capturedStart() == 0 and match.capturedLength() == len(value_str)):
+                if not reg_exp.search(value_str):
                     return False
 
         return True
@@ -1055,8 +1043,8 @@ class MSortFilterModel(QtCore.QSortFilterProxyModel):
         for attr, p_val in filter_patterns.items():
             for i, data_dict in enumerate(self.header_list):
                 if data_dict.get("key") == attr:
-                    # 直接设置 QRegularExpression
-                    data_dict["reg"].setPattern(p_val)
+                    # 直接设置正则模式（re 对象，忽略大小写）
+                    data_dict["reg"] = re.compile(p_val, re.IGNORECASE) if p_val else None
                     if p_val:
                         has_column_filter = True
                     break
@@ -1065,7 +1053,7 @@ class MSortFilterModel(QtCore.QSortFilterProxyModel):
         if not has_column_filter:
             for data_dict in self.header_list:
                 reg = data_dict.get("reg")
-                if reg and reg.pattern():
+                if reg and reg.pattern:
                     has_column_filter = True
                     break
 
@@ -1108,7 +1096,7 @@ class MSortFilterModel(QtCore.QSortFilterProxyModel):
         """更新过滤列的缓存"""
         self._filter_columns = [
             (i, header) for i, header in enumerate(self.header_list)
-            if header.get("reg") and header["reg"].pattern()
+            if header.get("reg") and header["reg"].pattern
         ]
 
     def invalidateFilter(self):
