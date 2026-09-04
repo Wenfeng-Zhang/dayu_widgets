@@ -43,8 +43,8 @@ header_list = [
         "key": "sex",
         "searchable": True,
         "icon": lambda x, y: (
-            "{}.svg".format(x.lower()),
-            getattr(dayu_theme, x.lower() + "_color"),
+            "{}.svg".format(x.lower()) if x else "user_fill.svg",
+            getattr(dayu_theme, "{}_color".format(x.lower())) if x else None,
         ),
     },
     {
