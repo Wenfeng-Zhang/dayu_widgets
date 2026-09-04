@@ -1,3 +1,6 @@
+# Import built-in modules
+import os
+
 # Import third-party modules
 import pytest
 from Qt import QtCore
@@ -5,6 +8,11 @@ from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets import mixin
+
+no_display = pytest.mark.skipif(
+    os.environ.get("QT_QPA_PLATFORM") == "offscreen",
+    reason="needs real pointer events / windowing, unstable under offscreen",
+)
 
 
 def test_property_mixin(qtbot):
@@ -28,6 +36,7 @@ def test_property_mixin(qtbot):
     assert test_widget._test_attr == "test_string"
 
 
+@no_display
 def test_cursor_mixin(qtbot):
     @mixin.cursor_mixin
     class _TestClass(QtWidgets.QPushButton):
@@ -133,6 +142,7 @@ def test_focus_shadow_mixin(qtbot):
     qtbot.waitUntil(check_effect)
 
 
+@no_display
 def test_hover_shadow_mixin(qtbot):
     @mixin.hover_shadow_mixin
     class _TestClass(QtWidgets.QPushButton):

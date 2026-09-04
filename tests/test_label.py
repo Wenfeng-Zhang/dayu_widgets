@@ -2,6 +2,9 @@
 Test class MLabel.
 """
 
+# Import built-in modules
+import os
+
 # Import third-party modules
 import pytest
 from Qt import QtCore
@@ -9,6 +12,11 @@ from Qt import QtWidgets
 
 # Import local modules
 from dayu_widgets.label import MLabel
+
+no_display = pytest.mark.skipif(
+    os.environ.get("QT_QPA_PLATFORM") == "offscreen",
+    reason="needs real font metrics / rendering, unstable under offscreen",
+)
 
 
 @pytest.mark.parametrize(
@@ -66,6 +74,7 @@ def test_label_dayu_style(qtbot, func, text, attr):
 
 
 @pytest.mark.parametrize("text, elide", (("test" * 30, True), ("test", False)))
+@no_display
 def test_label_elide_mode(qtbot, text, elide):
     """Test MLabel elide mode"""
     main_widget = QtWidgets.QWidget()

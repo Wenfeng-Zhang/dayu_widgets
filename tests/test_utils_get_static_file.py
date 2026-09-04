@@ -35,8 +35,11 @@ def setup_custom_folder(tmpdir_factory):
     (
         ("add_line.svg", os.path.join(DEFAULT_STATIC_FOLDER, "add_line.svg")),
         ("check.svg", os.path.join(DEFAULT_STATIC_FOLDER, "check.svg")),
-        ("", None),
-        ("a_not_exists_file", None),
+        ("", os.path.join(DEFAULT_STATIC_FOLDER, "icon-unknown.png")),
+        (
+            "a_not_exists_file",
+            os.path.join(DEFAULT_STATIC_FOLDER, "icon-unknown.png"),
+        ),
         (
             os.path.join(os.path.dirname(__file__), "for_test.txt"),
             os.path.join(os.path.dirname(__file__), "for_test.txt"),
@@ -55,8 +58,11 @@ def test_custom_static_folder(custom_folder):
     for input_file, result in (
         ("add_line.svg", os.path.join(DEFAULT_STATIC_FOLDER, "add_line.svg")),
         ("check.svg", os.path.join(DEFAULT_STATIC_FOLDER, "check.svg")),
-        ("", None),
-        ("a_not_exists_file", None),
+        ("", os.path.join(DEFAULT_STATIC_FOLDER, "icon-unknown.png")),
+        (
+            "a_not_exists_file",
+            os.path.join(DEFAULT_STATIC_FOLDER, "icon-unknown.png"),
+        ),
         (
             os.path.join(os.path.dirname(__file__), "for_test.txt"),
             # user give a full path file, return
