@@ -6,10 +6,6 @@
 # 包含 4 层深度、超过 page_size(100) 的子节点，触发懒加载分页
 ###################################################################
 
-# Import future modules
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import random
 

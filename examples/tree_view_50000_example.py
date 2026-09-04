@@ -10,10 +10,6 @@
 #   - 展开节点（每个根只有 1 个子节点）
 ###################################################################
 
-# Import future modules
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import random
 import time

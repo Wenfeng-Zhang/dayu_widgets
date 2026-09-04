@@ -10,10 +10,6 @@
 #   - 搜索过滤后重建分页（DataTables 模式：total=匹配数、回第一页）
 ###################################################################
 
-# Import future modules
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 # Import third-party modules
 from Qt import QtCore

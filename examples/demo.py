@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# Import future modules
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 # Import built-in modules
 import signal
@@ -75,7 +71,7 @@ class MDemo(QtWidgets.QMainWindow):
             data_list.append({"name": name.replace("_example", ""), "data": code})
             if not callable(cls):
                 continue
-            widget = cls()
+            widget = cls(parent=self)
             widget.setProperty("code", code)
             self.stacked_widget.addWidget(widget)
         list_widget.setup_data(data_list)

@@ -5,16 +5,14 @@
 # Date  : 2019.3
 # Email : muyanru345@163.com
 ###################################################################
-# Import future modules
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 # Import local modules
 from dayu_widgets import dayu_theme
 
 
 def score_color(score, y):
+    if not isinstance(score, (int, float)):  # group 节点等无 score 值时给默认色
+        return dayu_theme.info_color
     if score < 60:
         return dayu_theme.error_color
     elif score < 80:
@@ -40,8 +38,8 @@ header_list = [
         "searchable": True,
         "selectable": True,
         "icon": lambda x, y: (
-            "{}.svg".format(x.lower()),
-            getattr(dayu_theme, x.lower() + "_color"),
+            "{}.svg".format(x.lower()) if x else "user_fill.svg",
+            getattr(dayu_theme, "{}_color".format(x.lower())) if x else None,
         ),
     },
     {

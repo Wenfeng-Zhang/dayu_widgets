@@ -5,10 +5,6 @@
 # Date  : 2019.2
 # Email : muyanru345@163.com
 ###################################################################
-# Import future modules
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 # Import built-in modules
 import functools
@@ -120,7 +116,7 @@ class TableViewExample(QtWidgets.QWidget, MFieldMixin):
         main_lay.addWidget(MDivider("With Grid"))
         main_lay.addWidget(table_grid)
         main_lay.addStretch()
-        main_lay.addWidget(MAlert('Simply use "MItemViewSet" or "MItemViewFullSet"'))
+        main_lay.addWidget(MAlert('Simply use "MItemViewSet" or "MItemViewFullSet"', parent=self))
         self.setLayout(main_lay)
 
 
