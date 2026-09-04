@@ -1,0 +1,26 @@
+# 统一换行符，避免 Windows/Linux/macOS 之间 CRLF/LF 噪音
+* text=auto
+
+# 源码、文档、配置一律 LF
+*.py text eol=lf
+*.pyi text eol=lf
+*.md text eol=lf
+*.rst text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.cfg text eol=lf
+*.ini text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.qss text eol=lf
+*.css text eol=lf
+*.svg text eol=lf
+
+# 二进制文件不做换行转换
+*.png binary
+*.gif binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.whl binary
