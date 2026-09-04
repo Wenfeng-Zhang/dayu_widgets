@@ -164,10 +164,7 @@ def enable_context_menu(self, enable):
     if enable:
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         # 防止重复调用时重复 connect 导致一次右键多次发射
-        try:
-            self.customContextMenuRequested.disconnect(self.slot_context_menu)
-        except (RuntimeError, TypeError):
-            pass
+        utils.safe_disconnect(self.customContextMenuRequested, self.slot_context_menu)
         self.customContextMenuRequested.connect(self.slot_context_menu)
     else:
         self.setContextMenuPolicy(QtCore.Qt.NoContextMenu)

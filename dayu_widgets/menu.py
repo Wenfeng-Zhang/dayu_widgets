@@ -351,19 +351,16 @@ class ScrollableMenuBase(QtWidgets.QMenu):
         if action and not action.isSeparator():
 
             def ensureVisible():
-                self.delayTimer.timeout.disconnect()
+                utils.safe_disconnect(self.delayTimer.timeout)
                 self.ensureVisible(action)
 
-            try:
-                self.delayTimer.disconnect()
-            except:
-                pass
+            utils.safe_disconnect(self.delayTimer)
             self.delayTimer.timeout.connect(ensureVisible)
             self.delayTimer.start(150)
         elif oldAction and oldAction.menu() and oldAction.menu().isVisible():
 
             def closeMenu():
-                self.delayTimer.timeout.disconnect()
+                utils.safe_disconnect(self.delayTimer.timeout)
                 oldAction.menu().hide()
 
             self.delayTimer.timeout.connect(closeMenu)
@@ -643,10 +640,7 @@ class MMenu(SearchableMenuBase):
         assert callable(func)
         self._load_data_func = func
         # 防止重复调用时重复连接 aboutToShow
-        try:
-            self.aboutToShow.disconnect(self.slot_fetch_data)
-        except (RuntimeError, TypeError):
-            pass
+        utils.safe_disconnect(self.aboutToShow, self.slot_fetch_data)
         self.aboutToShow.connect(self.slot_fetch_data)
 
     def slot_fetch_data(self):

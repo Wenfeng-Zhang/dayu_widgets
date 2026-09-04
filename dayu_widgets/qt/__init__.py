@@ -143,7 +143,18 @@ def application(*args):
         yield app
         app.exec_()
     else:
-        yield app
+        # IDE/REPL 下复用已有 app 时也必须进入事件循环，否则窗口 show() 后主线程
+        # 立即退出 → 闪退。加防重入标志，避免嵌套调用（如 Maya 宿主已有循环）重复 exec_。
+        already_running = app.property("_dayu_application_running")
+        if not already_running:
+            app.setProperty("_dayu_application_running", True)
+            try:
+                yield app
+                app.exec_()
+            finally:
+                app.setProperty("_dayu_application_running", False)
+        else:
+            yield app
 
 
 MPixmap = MCacheDict(QtGui.QPixmap)

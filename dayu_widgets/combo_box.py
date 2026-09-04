@@ -33,10 +33,7 @@ class MComboBoxSearchMixin(object):
         # 注意：不要对 returnPressed 做无参 disconnect —— 那会断开该信号的全部连接
         # （含 QComboBox 内部与用户连接）。search() 本身不连接该信号，无需清理。
         # 防止重复调用 search() 时重复连接 textEdited
-        try:
-            edit.textEdited.disconnect(self.filter_model.setFilterFixedString)
-        except (RuntimeError, TypeError):
-            pass
+        utils.safe_disconnect(edit.textEdited, self.filter_model.setFilterFixedString)
         edit.textEdited.connect(self.filter_model.setFilterFixedString)
         if not getattr(self, "_search_activated_connected", False):
             self.completer.activated.connect(lambda t: t and self.setCurrentIndex(self.findText(t)))
@@ -120,11 +117,8 @@ class MComboBox(MComboBoxSearchMixin, QtWidgets.QComboBox):
 
     def set_menu(self, menu):
         if self._root_menu is not None:
-            try:
-                self._root_menu.sig_value_changed.disconnect(self.sig_value_changed)
-                self._root_menu.sig_value_changed.disconnect(self.set_value)
-            except (RuntimeError, TypeError):
-                pass
+            utils.safe_disconnect(self._root_menu.sig_value_changed, self.sig_value_changed)
+            utils.safe_disconnect(self._root_menu.sig_value_changed, self.set_value)
         self._root_menu = menu
         self._root_menu.sig_value_changed.connect(self.sig_value_changed)
         self._root_menu.sig_value_changed.connect(self.set_value)

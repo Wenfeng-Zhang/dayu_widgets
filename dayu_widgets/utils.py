@@ -8,6 +8,7 @@ import datetime as dt
 from functools import singledispatch
 import math
 import os
+import warnings
 
 # Import third-party modules
 from Qt import QtCore
@@ -45,6 +46,24 @@ def get_static_file(path):
     if os.path.isfile(full_path):
         return full_path
     return os.path.join(DEFAULT_STATIC_FOLDER, "icon-unknown.png")
+
+
+def safe_disconnect(signal, slot=None):
+    """安全断开信号连接。
+
+    PySide6 对「从未连接的信号」调用 disconnect 会发出 RuntimeWarning（而非抛异常），
+    PySide2/PyQt 则可能抛 RuntimeError/TypeError。这里兼容两种情况，供
+    「先 disconnect 防重、再 connect」的模式使用。
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        try:
+            if slot is None:
+                signal.disconnect()
+            else:
+                signal.disconnect(slot)
+        except (RuntimeError, TypeError):
+            pass
 
 
 def from_list_to_nested_dict(input_arg, sep="/"):
