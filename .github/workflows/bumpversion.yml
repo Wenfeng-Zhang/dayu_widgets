@@ -1,18 +1,30 @@
 name: Bump version
 
+# 本 fork 不使用 commitizen 自动 bump。
+# 原因：自动 bump 需要 PERSONAL_ACCESS_TOKEN（默认 GITHUB_TOKEN push 出的 tag
+# 不会触发下游的 Create GitHub Release workflow）。
+#
+# 版本号与 tag 由维护者手动处理：
+#   1. 修改 pyproject.toml 与 dayu_widgets/__version__.py 的版本号（保持一致）
+#   2. 在 CHANGELOG.md 顶部补充对应版本段落
+#   3. git commit && git push
+#   4. git tag vX.Y.Z && git push origin vX.Y.Z     ← 触发 Create GitHub Release
+#
+# 如需恢复自动 bump：配置 PERSONAL_ACCESS_TOKEN secret，并把下面的 on 改回
+#   on:
+#     push:
+#       branches: [master]
+
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch:
 
 jobs:
   bump-version:
-    if: "!startsWith(github.event.head_commit.message, 'bump:')"
     runs-on: ubuntu-latest
     name: "Bump version and create changelog with commitizen"
     steps:
       - name: Check out
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: '${{ secrets.PERSONAL_ACCESS_TOKEN }}'

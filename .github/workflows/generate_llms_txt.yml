@@ -1,9 +1,15 @@
 name: Generate llms.txt
 
+# 仅在 llms.txt 的内容来源发生变化时重新生成（examples / 生成脚本 / 库代码），
+# 避免每次 push 到 master 都白跑一次。
 on:
   push:
     branches:
       - master
+    paths:
+      - 'examples/**'
+      - 'scripts/generate_llms_txt.py'
+      - 'dayu_widgets/**'
   workflow_dispatch:
 
 jobs:
