@@ -1,12 +1,13 @@
 [tool.poetry]
 name = "dayu_widgets"
 version = "1.2.1"
-description = "Components for PySide2/PySide6."
-homepage = "https://github.com/muyr/dayu_widgets3"
-repository = "https://github.com/muyr/dayu_widgets3"
-documentation = "https://muyr.github.io/dayu_widgets3/#/"
-keywords = ["UI", "PySide2", "PyQt5", "PySide6"]
-authors = ["muyanru <muyanru@163.com>"]
+description = "Components for PySide2/PySide6 (fork of phenom-films/dayu_widgets with local fixes)."
+homepage = "https://github.com/Wenfeng-Zhang/dayu_widgets"
+repository = "https://github.com/Wenfeng-Zhang/dayu_widgets"
+documentation = "https://github.com/Wenfeng-Zhang/dayu_widgets#readme"
+keywords = ["UI", "PySide2", "PySide6", "Qt"]
+# upstream author (muyanru) credited first, fork maintainer appended
+authors = ["muyanru <muyanru@163.com>", "Wenfeng-Zhang"]
 license = "MIT"
 readme = "README.md"
 classifiers = [
@@ -17,6 +18,8 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 packages = [{ include = "dayu_widgets" }]
 
@@ -24,7 +27,11 @@ packages = [{ include = "dayu_widgets" }]
 python = "^3.7"
 "Qt.py" = ">=2.0.5"
 dayu_path = "^0.5.3"
+# PySide2 仅支持 Python < 3.11（上游 wheel 的硬限制）
 PySide2 = { version = ">=5.15.2.1", optional = true, python = "<3.11" }
+# PySide6 的可用版本随 Python 版本变化（3.13 需 >=6.8，3.14 需 >=6.10）。
+# 这里收窄到 poetry 能自洽解析的区间；CI 会按 Python 版本显式安装合适的 PySide6，
+# 因此 3.13/3.14 由 classifier 声明支持、由 CI 实测覆盖。
 PySide6 = { version = ">=6.4.2,<6.7", optional = true, python = "<3.12" }
 
 [tool.poetry.group.dev.dependencies]
@@ -40,7 +47,7 @@ pyside6 = ["PySide6"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "1.2.0"
+version = "1.2.1"
 tag_format = "v$version"
 version_files = [
     "pyproject.toml:version",
