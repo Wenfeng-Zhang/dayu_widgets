@@ -1,21 +1,15 @@
 # dayu_widgets
 
 <p align="center">
-<a href="https://img.shields.io/pypi/pyversions/dayu_widgets">
-<img src="https://img.shields.io/pypi/pyversions/dayu_widgets" alt="python version"></a>
-<a href="https://badge.fury.io/py/dayu_widgets">
-<img src="https://img.shields.io/pypi/v/dayu_widgets?color=green" alt="PyPI version"></a>
-<img src="https://img.shields.io/pypi/dw/dayu_widgets" alt="Downloads Status">
-<img src="https://img.shields.io/pypi/l/dayu_widgets" alt="License">
-<img src="https://img.shields.io/pypi/format/dayu_widgets" alt="pypi format">
-<img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" alt="Maintenance"></a>
-<a href="https://context7.com/phenom-films/dayu_widgets">
-<img src="https://img.shields.io/badge/Context7-Enabled-blue" alt="Context7 Enabled"></a>
-
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+<a href="https://github.com/Wenfeng-Zhang/dayu_widgets/actions/workflows/ci-test.yml">
+<img src="https://github.com/Wenfeng-Zhang/dayu_widgets/actions/workflows/ci-test.yml/badge.svg" alt="CI"></a>
+<img src="https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue" alt="python versions">
+<img src="https://img.shields.io/badge/Qt-PySide2%20%7C%20PySide6-blue" alt="Qt binding">
+<img src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue" alt="platforms">
+<img src="https://img.shields.io/badge/license-MIT-green" alt="License">
 </p>
+
+> 本仓库是 [phenom-films/dayu_widgets](https://github.com/phenom-films/dayu_widgets) 的 fork，保留上游全部组件，并包含本地化的修复与增强。差异详见下方「本 Fork 更新说明」。
 
 <!-- ================= 以下为本 fork 新增内容（相对上游 v1.1.1） ================= -->
 
@@ -65,10 +59,11 @@
 - 修复 PySide6 下 `disconnect` 的 `RuntimeWarning`（新增 `utils.safe_disconnect`）
 - 依赖约束修正：`PySide2 <3.11`、`PySide6 >=6.4.2,<6.7`、补 `dayu_path`
 - 清理 52 个 example 的 `from __future__` 残留、修正 version 对齐 1.2.1
+- CI 矩阵覆盖 **Windows / Linux / macOS** 三端 × Python 3.7-3.14 × PySide2/PySide6，并提供 492 个单元测试
 
 <!-- ================= 以上为本 fork 新增内容 ================= -->
 
-> **AI Assistant Integration**: This project is integrated with [Context7](https://context7.com/phenom-films/dayu_widgets), allowing AI assistants to access up-to-date documentation and examples. Try prompts like: `帮我创建一个dayu_widgets的进度条， use context7`
+> **AI 助手集成**：本仓库提供 `llms.txt`（由 `examples/` 自动生成），AI 助手可据此获取组件用法与示例。详见下方「AI 助手支持」。
 
 
 Components for PySide
@@ -208,69 +203,101 @@ Components for PySide
 
 ## 安装
 
+本仓库**未发布到 PyPI**（`dayu_widgets` 包名属于上游项目），请从 GitHub 安装：
+
 ```shell
-pip install dayu_widgets
+# 方式一：直接从 GitHub 安装
+pip install "dayu_widgets[pyside6] @ git+https://github.com/Wenfeng-Zhang/dayu_widgets.git"
+
+# 方式二：克隆后本地开发安装（适合二次开发）
+git clone https://github.com/Wenfeng-Zhang/dayu_widgets.git
+cd dayu_widgets
+python -m venv .venv
+# Windows: .\.venv\Scripts\Activate.ps1    Linux/macOS: source .venv/bin/activate
+pip install -e ".[pyside6]"      # 需要 PySide2 时改为 ".[pyside2]"
 ```
 
 ## 运行示例程序
 
-安装后，可以通过以下命令直接运行示例程序。注意，运行示例程序需要 Qt 环境（PySide2 或 PySide6）：
+安装后（并已激活虚拟环境），直接运行示例：
 
 ```shell
-# 使用 Python 模块方式运行（需要先安装 PySide2 或 PySide6）
 python -m dayu_widgets
-
-# 使用 uvx 命令行工具运行（推荐方式，自动处理依赖）
-uvx --python 3.10 --with pyside2 dayu_widgets
 ```
 
-> **注意**：dayu_widgets 是一个 Qt 界面库，运行示例程序需要 Qt 环境。使用 `uvx` 命令时可以通过 `--with pyside2` 参数自动处理 Qt 依赖。
+> **注意**：dayu_widgets 是 Qt 界面库，运行示例需要 Qt 环境（PySide2 或 PySide6）。Linux 上还需系统库 `libxcb-*` / `libxkbcommon-x11` 等。
 
-# 如何贡献代码
+# 如何开发
 
-## 安装poetry
+## 创建环境
+
+```shell
+python -m venv .venv
+# Windows: .\.venv\Scripts\Activate.ps1    Linux/macOS: source .venv/bin/activate
+pip install -e ".[pyside6]" pytest pytest-qt pytest-cov
+```
+
+或使用 poetry（上游流程）：
+
 ```shell
 pip install poetry
-```
-
-## 安装依赖
-```shell
 poetry install
 ```
 
 ## 运行单元测试
+
 ```shell
-poetry run pytest
+pytest -q
 ```
 
-## 运行 black检查
-```shell
-poetry run black dayu_widgets
-```
+## 代码格式化
 
-## 运行isort
 ```shell
-poetry run isort dayu_widgets
+black dayu_widgets      # line-length = 120
+isort dayu_widgets
 ```
 
 ## 提交代码
+
+commit message 建议遵循 [Conventional Commits](https://www.conventionalcommits.org/)
+（`feat:` / `fix:` / `docs:` / `chore:`），便于生成 CHANGELOG：
+
 ```shell
 poetry run cz commit
 ```
 
-## Context7 Integration
+## 发布新版本
 
-This project includes a `llms.txt` file that provides code examples and documentation for AI assistants and LLMs through [Context7](https://context7.com/). The file is automatically generated from the examples in the `examples/` directory.
+版本号与 tag 由维护者手动处理（本 fork 未启用 CI 自动 bump）：
 
-To manually generate the `llms.txt` file, run:
+1. 修改 `pyproject.toml` 与 `dayu_widgets/__version__.py` 的版本号（**两处保持一致**）
+2. 在 `CHANGELOG.md` 顶部补充对应版本段落
+3. 提交并推送：
+
+   ```shell
+   git commit -am "chore: bump version to X.Y.Z"
+   git push origin master
+   ```
+
+4. 打 tag 并推送（会触发 `Create GitHub Release` 自动创建 Release）：
+
+   ```shell
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
+   ```
+
+## AI 助手支持（llms.txt）
+
+
+本仓库包含 `llms.txt`，为 AI 助手 / LLM 提供组件用法与示例代码，内容由 `examples/` 目录自动生成：
 
 ```shell
 python scripts/generate_llms_txt.py
 ```
 
-## Contributors ✨
+## 上游作者（Upstream Credits）
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+本 fork 的上游组件由以下作者贡献，感谢他们的工作：
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
