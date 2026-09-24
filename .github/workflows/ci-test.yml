@@ -4,6 +4,10 @@ name: Test and Lint
 # 注意列表里故意不含 .github/workflows/**，因此修改 workflow 自身仍会触发，便于验证 CI 改动。
 on:
   push:
+    # 限定只响应分支 push。若不加 branches，push tag 时也会触发整套矩阵
+    # （tag 发布由 python-publish.yml 负责，见该文件的 on.push.tags）
+    branches:
+      - '**'
     paths-ignore:
       - '**.md'
       - 'docs/**'
